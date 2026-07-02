@@ -12,3 +12,17 @@ model User {
   email String  @unique
   name  String?
 } 
+
+model Movie {
+  id                  String            @id @default(cuid())
+  name                String
+  description         String
+  casts               String[]
+  trailerUrl          String
+  language            String            @default("English")
+  releaseDate         String
+  director            String
+  releaseStatus       String            @default("RELEASED")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}

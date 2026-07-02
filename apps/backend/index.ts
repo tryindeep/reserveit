@@ -1,4 +1,4 @@
-
+import "dotenv/config";
 import express from "express";
 import { db } from "@repo/db";
 const app = express();
@@ -6,16 +6,21 @@ const app = express();
 
 
 
+
+
 async function main() {
     await db.$connect(); // fails fast if neon/pool is unreachable
-    app.listen(3000,() => {
-        console.log("listing on port 3000")
+    app.listen(process.env.PORT,() => {
+        console.log(`Sever started on port ${process.env.PORT} !!`)
     });
 }
 main().catch((e) => {
     console.error(e);
     process.exit(1);
 });
+
+
+
 
 // graceful shutdown
 process.on("SIGINT", async () => {
