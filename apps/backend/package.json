@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "@repo/backend",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -8,5 +8,10 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1",
+    "@repo/db": "*"
   }
 }
