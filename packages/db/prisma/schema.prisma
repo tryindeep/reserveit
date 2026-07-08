@@ -24,5 +24,5 @@ model Movie {
   director            String
   releaseStatus       String            @default("RELEASED")
   createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  updatedAt           DateTime          @updatedAt   
 }

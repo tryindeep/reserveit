@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "reserveit",
+      "dependencies": {
+        "zod": "^4.4.3",
+      },
       "devDependencies": {
         "prettier": "^3.7.4",
         "turbo": "^2.10.2",
