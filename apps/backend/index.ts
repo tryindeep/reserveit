@@ -2,12 +2,20 @@ import "dotenv/config";
 import express from "express";
 import { db } from "@repo/db";
 const app = express();
+app.use(express.json());
+
+
+
+// Routers
+import {movieRouter} from "./routes/movie.routes"
+
+//versions
+app.use("/api/v1/movie" , movieRouter)
 
 
 
 
-
-
+// linking with Database
 async function main() {
     await db.$connect(); // fails fast if neon/pool is unreachable
     app.listen(process.env.PORT,() => {
