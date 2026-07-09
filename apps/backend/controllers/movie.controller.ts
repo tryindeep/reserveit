@@ -1,16 +1,16 @@
 import type { RequestHandler } from "express";
-import { db } from "@repo/db";
 import z from "zod";
+import { MovieService } from "../services/movie.service";
 
 const createMovieSchema = z.object({
-    name: z.string().min(1).max(200),
-    description: z.string().min(1),
-    casts: z.array(z.string().min(1)),
-    trailerUrl: z.url(),
-    language: z.string().default("English"),
-    releaseDate: z.string(), // stored as String per schema
-    director:z.string().min(1),
-    releaseStatus: z.enum(["RELEASED" , "UPCOMING", "CANCELLED"]).default("RELEASED"),
+  name: z.string().min(1).max(200),
+  description: z.string().min(1),
+  casts: z.array(z.string()).min(1),
+  trailerUrl: z.url(),
+  language: z.string().default("English"),
+  releaseDate: z.coerce.date(),
+  director: z.string().min(1),
+  releaseStatus: z.enum(["RELEASED", "UPCOMING", "CANCELLED"]).default("RELEASED"),
 });
 
 type MovieControllerType = {
@@ -25,14 +25,17 @@ export const MovieController : MovieControllerType = {
         try {
             const parsed = createMovieSchema.safeParse(req.body);
             if(!parsed.success) {
-                return res.status(201).json({
+                return res.status(400).json({
                     success: false,
                     message: "Invalid Input",
                     errors: parsed.error.issues
                 });
             }
-            const movie  = await db.movie.create({data : parsed.data});
-            return res.status(400).json({
+            const movie = await MovieService.createMovie({
+                ...parsed.data,
+                releaseDate: parsed.data.releaseDate.toISOString(),
+            })
+            return res.status(201).json({
                 success: true,
                 data: movie
             })
@@ -44,8 +47,4 @@ export const MovieController : MovieControllerType = {
             })
         }
     },
-
-
-
-
 }
