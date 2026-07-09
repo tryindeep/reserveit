@@ -7,11 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
-model User { 
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique
-  name  String?
-} 
+model User {
+  id                  String            @id @default(cuid())
+  email               String            @unique
+  name                String?
+}
+
+enum ReleaseStatus {
+  RELEASED
+  UPCOMING
+  CANCELLED
+}
 
 model Movie {
   id                  String            @id @default(cuid())
@@ -20,9 +26,9 @@ model Movie {
   casts               String[]
   trailerUrl          String
   language            String            @default("English")
-  releaseDate         String
+  releaseDate         DateTime
   director            String
-  releaseStatus       String            @default("RELEASED")
+  releaseStatus       ReleaseStatus     @default(RELEASED)
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt   
 }
