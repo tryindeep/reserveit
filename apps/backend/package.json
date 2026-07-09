@@ -4,7 +4,12 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@types/body-parser": "^1.19.6",
     "@types/bun": "latest"
+  },
+  "scripts": {
+    "dev": "bun --watch index.ts",
+    "start": "bun index.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -12,6 +17,7 @@
   "dependencies": {
     "@repo/db": "*",
     "@types/express": "^5.0.6",
+    "body-parser": "^2.3.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1"
   }

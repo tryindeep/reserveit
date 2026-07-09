@@ -1,9 +1,12 @@
 import "dotenv/config";
 import express from "express";
+import bodyParser from "body-parser"
 import { db } from "@repo/db";
 const app = express();
-app.use(express.json());
 
+// configuring a body parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}))
 
 
 // Routers
