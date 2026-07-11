@@ -1,6 +1,8 @@
-import type { RequestHandler } from "express";
-import z, { success } from "zod";
+import z from "zod";
 import { MovieService } from "../services/movie.service";
+import { asyncHandler } from "../utils/asyncHandler";
+import type { RequestHandler } from "express";
+import { sendError, sendSuccess } from "../utils/responseBody";
 
 const createMovieSchema = z.object({
   name: z.string().min(1).max(200),
@@ -26,126 +28,69 @@ type MovieControllerType = {
 export const MovieController : MovieControllerType = {
 
     // CREATE 
-    createMovie:  async (req,res) => {
-        try {
+    createMovie:  asyncHandler(async (req,res) => {
             const parsed = createMovieSchema.safeParse(req.body);
             if(!parsed.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid Input",
-                    errors: parsed.error.issues
-                });
+                return sendError(res , 400 , "Invalid" , parsed.error.issues);
             }
             const movie = await MovieService.createMovie({
                 ...parsed.data,
                 releaseDate: parsed.data.releaseDate.toISOString(),
             })
-            return res.status(201).json({
-                success: true,
-                data: movie
-            })
-        } catch (error) {
-            console.error("create Movie Error : ", error);
-            return res.status(500).json({
-                success : false,
-                message : "Internal Server Error"
-            })
+            return sendSuccess(res , 201, movie, "Successfully created the movie");
         }
-    },
-    
+    ),
+
     // GET ALL MOVIES
-    getAllMovies : async ( req, res) => {
-       try {
-            const movies = await MovieService.getAllMovies();
-            return res.status(200).json({
-                success: true,
-                data: movies
-            });
-       } catch (error) {
-        console.error("getAllMovies : ", error);
-        return res.status(500).json({
-            success: false,
-            message : "Internal server error"
-        })
-       }
-    },
+    getAllMovies : asyncHandler(async ( req, res) => {
+        const movies = await MovieService.getAllMovies();
+        return sendSuccess(res , 200, movies)
+    }),
 
     // GET MOVIE BY ID 
-    getMovieById : async (req , res) => {
-        try {
+    getMovieById : asyncHandler(async (req , res) => {
             const { id } = req.params;
+            if (typeof id !== "string" || !id.trim()) {
+                return sendError(res, 400, "Invalid movie id");
+            }
             const movie = await MovieService.getMovieById(id);
             if(!movie){
-                return res.status(404).json({
-                    success: false, 
-                    message: "Movie not found"
-                });
+                return sendError(res , 404, "Movie not found")
             }
-            return res.status(200).json({
-                success : true,
-                data : movie
-            })
-        } catch (error) {
-            console.error("getMovieById : ", error);
-            return res.status(500).json({
-                success: false,
-                message : "Internal server error"  });
-        }
-    },
+            return sendSuccess(res , 200, movie)
+    }),
 
     // update
-    updateMovie :  async (req , res) => {
-        try {
+    updateMovie :  asyncHandler(async (req , res) => {
             const { id } = req.params;
-            
+            if (typeof id !== "string" || !id.trim()) {
+                return sendError(res, 400, "Invalid movie id");
+            }
             const parsed = updateMovieSchema.safeParse(req.body);
             if(!parsed.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid Input",
-                    errors: parsed.error.issues
-                });
+                return sendError(res , 400, "Invalid Input", parsed.error.issues)
             }
-            const updatedMovie = await MovieService.updateMovie(id , parsed.data)
+            const updateData = {
+                ...parsed.data,
+                releaseDate: parsed.data.releaseDate?.toISOString(),
+            };
+            const updatedMovie = await MovieService.updateMovie(id , updateData)
             if(!updatedMovie){
-                return res.status(404).json({
-                    success: false,
-                    message : "Movie not found"
-                })
+                return sendError(res , 404, "Movie not found")
             }
-            return res.status(200).json({success : true, data: updatedMovie})
-        } catch (error) {
-            console.error("updateMovie : ", error);
-            return res.status(500).json({
-                success: false,
-                message : "Internal server error"  });
-        }
-    },
+            return sendSuccess(res, 200, updatedMovie, "Movie has been updated")
+    }),
 
     // Delete Movie
-    deleteMovie : async (req , res) => {
-        try {
+    deleteMovie : asyncHandler(async (req , res) => {
             const { id } = req.params;
+            if (typeof id !== "string" || !id.trim()) {
+                return sendError(res, 400, "Invalid movie id");
+            }
             const deleted = await MovieService.deleteMovie(id);
             if(!deleted){
-                return res.status(200).json({
-                    success: false, 
-                    message: "Movie not found"
-                })
-
+                return sendError(res, 404, "Movie not found")
             }
-            return res.status(200).json({
-                success : true,
-                data : "Movie deleted success fully"
-            })
-            
-        } catch (error) {
-            console.error("deleteMovie : ", error);
-            return res.status(500).json({
-                success: false,
-                message : "Internal server error"  });
-        }
-        
-
-    }
-}
+            return sendSuccess (res, 200, "Movie deleted successfully")
+    })
+};
