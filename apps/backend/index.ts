@@ -15,7 +15,7 @@ import {movieRouter} from "./routes/movie.routes"
 
 
 //versions
-app.use("/api/v1/movie" , movieRouter)
+app.use("/api/v1/movies" , movieRouter)
 
 
 // Central error handler — MUST come after all routes

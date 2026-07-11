@@ -13,6 +13,18 @@ export const MovieService = {
         return db.movie.findUnique({where :{id} })
     },
 
+    fetchMovies : async( name : string) => {
+        return db.movie.findMany({
+            where: {
+                name: {
+                    contains: name,
+                    mode: "insensitive",
+                },
+            },
+            orderBy: { createdAt: "desc" },
+        })
+    },
+
     updateMovie : async ( id : string , data : Prisma.MovieUpdateInput) => {
         const existingMovie = await db.movie.findUnique({where: {id}});
         if(!existingMovie) return null;
