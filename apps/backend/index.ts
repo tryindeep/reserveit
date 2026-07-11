@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import bodyParser from "body-parser"
 import { db } from "@repo/db";
+import { errorHandler } from "./utils/errorHandler";
 const app = express();
 
 // configuring a body parser
@@ -12,10 +13,13 @@ app.use(bodyParser.urlencoded({extended:true}))
 // Routers
 import {movieRouter} from "./routes/movie.routes"
 
+
 //versions
 app.use("/api/v1/movie" , movieRouter)
 
 
+// Central error handler — MUST come after all routes
+app.use(errorHandler);
 
 
 // linking with Database
