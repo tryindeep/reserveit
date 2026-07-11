@@ -21,6 +21,7 @@ type MovieControllerType = {
     createMovie: RequestHandler,
     getAllMovies: RequestHandler,
     getMovieById: RequestHandler,
+    fetchMovies : RequestHandler
     updateMovie: RequestHandler,
     deleteMovie: RequestHandler,
 }
@@ -60,6 +61,19 @@ export const MovieController : MovieControllerType = {
             return sendSuccess(res , 200, movie)
     }),
 
+
+    // fetch movie by name
+    fetchMovies : asyncHandler(async (req , res) => {
+            const name = req.query.name;
+            if (typeof name !== "string" || !name.trim()) {
+                return sendError(res, 400, "Invalid movie name");
+            }
+            const foundMovies = await MovieService.fetchMovies(name);
+            if(!foundMovies || foundMovies.length == 0){
+                sendError(res , 404, "Not found any movies on this name");
+            }
+            return sendSuccess(res , 200, foundMovies);
+    }),
     // update
     updateMovie :  asyncHandler(async (req , res) => {
             const { id } = req.params;
