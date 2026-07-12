@@ -9,20 +9,16 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))
 
-
 // Routers
 import {movieRouter} from "./routes/movie.routes"
 import { theaterRouter } from "./routes/theater.routes";
-
 
 //versions
 app.use("/api/v1/movies" , movieRouter);
 app.use("/api/v1/theaters", theaterRouter);
 
-
 // Central error handler — MUST come after all routes
 app.use(errorHandler);
-
 
 // linking with Database
 async function main() {
@@ -35,9 +31,6 @@ main().catch((e) => {
     console.error(e);
     process.exit(1);
 });
-
-
-
 
 // graceful shutdown
 process.on("SIGINT", async () => {

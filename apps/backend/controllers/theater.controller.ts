@@ -20,11 +20,11 @@ import z from "zod"
 const updateTheaterSchema = createTheaterSchema.partial(); 
 
 type TheaterControllerType = {
-    createTheater : RequestHandler,
-    updateTheater : RequestHandler,
+    createTheater  : RequestHandler,
+    updateTheater  : RequestHandler,
     getAllTheaters : RequestHandler,
-    fetchTheater : RequestHandler,
-    deleteTheater : RequestHandler,
+    fetchTheater   : RequestHandler,
+    deleteTheater  : RequestHandler,
     getTheaterById : RequestHandler,
 }
 export const TheaterController : TheaterControllerType = {

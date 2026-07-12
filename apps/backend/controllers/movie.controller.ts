@@ -18,12 +18,12 @@ const createMovieSchema = z.object({
 const updateMovieSchema = createMovieSchema.partial();
 
 type MovieControllerType = {
-    createMovie: RequestHandler,
-    getAllMovies: RequestHandler,
-    getMovieById: RequestHandler,
-    fetchMovies : RequestHandler
-    updateMovie: RequestHandler,
-    deleteMovie: RequestHandler,
+    createMovie  : RequestHandler,
+    getAllMovies : RequestHandler,
+    getMovieById : RequestHandler,
+    fetchMovies  : RequestHandler
+    updateMovie  : RequestHandler,
+    deleteMovie  : RequestHandler,
 }
 
 export const MovieController : MovieControllerType = {
@@ -82,7 +82,7 @@ export const MovieController : MovieControllerType = {
             }
             const parsed = updateMovieSchema.safeParse(req.body);
             if(!parsed.success) {
-                return sendError(res , 400, "Invalid Input", parsed.error.issues)
+                return sendError(res , 400, "Invalid Input", parsed.error.issues);
             }
             const updateData = {
                 ...parsed.data,

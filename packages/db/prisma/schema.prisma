@@ -50,8 +50,8 @@ model Theater {
   amenities           String[] // e.g. ["Parking", "Food Court", "Wheelchair Access"]
   isActive            Boolean           @default(true)
   screens             Screen[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 }
 
 // SCREEN
@@ -63,14 +63,16 @@ enum ScreenType {
   RECLINER
 }
 model Screen {
-  id                String              @id @default(cuid())
-  name              String 
-  totalSeats        Int
-  screenType        ScreenType          @default(STANDARD)
-  theaterId         String
-  theater           Theater             @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  
+  id                 String              @id @default(cuid())
+  name               String 
+  totalSeats         Int
+  screenType         ScreenType          @default(STANDARD)
+  theaterId          String
+  theater            Theater             @relation(fields: [theaterId], references: [id], onDelete: Cascade)
   // show times         Showtime[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
   @@unique([theaterId, name]) //prevents two screens with the same name in one theater
 }
