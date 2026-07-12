@@ -70,7 +70,7 @@ export const MovieController : MovieControllerType = {
             }
             const foundMovies = await MovieService.fetchMovies(name);
             if(!foundMovies || foundMovies.length == 0){
-                sendError(res , 404, "Not found any movies on this name");
+                return sendError(res , 404, "Not found any movies on this name");
             }
             return sendSuccess(res , 200, foundMovies);
     }),
