@@ -157,5 +157,5 @@ model Showtime {
   @@unique([movieId])
   @@unique([screenId])
   @@unique([startTime])
-  @@unique([screenId, startTime])
+  @@unique([screenId, startTime]) // prevents double-booking a screen at the exact same start time
 }
