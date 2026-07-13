@@ -7,14 +7,24 @@ datasource db {
   provider = "postgresql"
 }
 
+//
+// =========================
+// USER
+// =========================
+//
+
 model User {
-  id                  String            @id @default(cuid())
-  email               String            @unique
-  name                String?
+  id    String  @id @default(cuid())
+  email String  @unique
+  name  String?
 }
 
+//
+// =========================
+// MOVIE
+// =========================
+//
 
-// MOVIE 
 enum ReleaseStatus {
   RELEASED
   UPCOMING
@@ -22,60 +32,80 @@ enum ReleaseStatus {
 }
 
 model Movie {
-  id                  String            @id @default(cuid())
-  name                String
-  description         String
-  casts               String[]
-  trailerUrl          String
-  language            String            @default("English")
-  releaseDate         DateTime
-  director            String
-  releaseStatus       ReleaseStatus     @default(RELEASED)
-  theaterMovies       TheaterMovie[]
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt   
+  id              String          @id @default(cuid())
+
+  name            String
+  description     String
+  casts           String[]
+  trailerUrl      String
+  language        String          @default("English")
+  releaseDate     DateTime
+  director        String
+  releaseStatus   ReleaseStatus   @default(RELEASED)
+
+  theaterMovies   TheaterMovie[]
+  showtimes       Showtime[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
+//
+// =========================
 // THEATER
+// =========================
+//
+
 model Theater {
-  id                  String            @id @default(cuid())
-  name                String   
-  description         String?
-  city                String
-  address             String 
-  state               String?
-  pincode             String?
-  latitude            Float?
-  longitude           Float?
-  totalScreens        Int               @default(1)
-  amenities           String[] // e.g. ["Parking", "Food Court", "Wheelchair Access"]
-  isActive            Boolean           @default(true)
-  theaterMovies       TheaterMovie[]
-  screens             Screen[]
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id              String          @id @default(cuid())
+
+  name            String
+  description     String?
+  city            String
+  address         String
+  state           String?
+  pincode         String?
+
+  latitude        Float?
+  longitude       Float?
+
+  totalScreens    Int             @default(1)
+  amenities       String[]        // ["Parking", "Food Court", "Wheelchair Access"]
+  isActive        Boolean         @default(true)
+
+  theaterMovies   TheaterMovie[]
+  screens         Screen[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
-// THEATER MOVIE
+//
+// =========================
+// THEATER MOVIE (Junction)
+// =========================
+//
 
 model TheaterMovie {
-  id                  String            @id @default(cuid())
+  id              String          @id @default(cuid())
 
-  theaterId           String
-  theater             Theater           @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  theaterId       String
+  theater         Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
 
-  movieId             String          
-  movie               Movie             @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId         String
+  movie           Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-
-  addedAt             DateTime          @default(now())
+  addedAt         DateTime        @default(now())
 
   @@unique([theaterId, movieId])
 }
 
-
-
+//
+// =========================
 // SCREEN
+// =========================
+//
+
 enum ScreenType {
   STANDARD
   IMAX
@@ -83,17 +113,49 @@ enum ScreenType {
   GOLD_CLASS
   RECLINER
 }
-model Screen {
-  
-  id                 String              @id @default(cuid())
-  name               String 
-  totalSeats         Int
-  screenType         ScreenType          @default(STANDARD)
-  theaterId          String
-  theater            Theater             @relation(fields: [theaterId], references: [id], onDelete: Cascade)
-  // show times         Showtime[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
 
-  @@unique([theaterId, name]) //prevents two screens with the same name in one theater
+model Screen {
+  id              String          @id @default(cuid())
+
+  name            String
+  totalSeats      Int
+  screenType      ScreenType      @default(STANDARD)
+
+  theaterId       String
+  theater         Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+
+  showtimes       Showtime[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([theaterId, name]) // Prevent duplicate screen names within a theater
+}
+
+//
+// =========================
+// SHOWTIME
+// =========================
+//
+
+model Showtime {
+  id              String          @id @default(cuid())
+
+  movieId         String
+  movie           Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  screenId        String
+  screen          Screen          @relation(fields: [screenId], references: [id], onDelete: Cascade)
+
+  startTime       DateTime
+  endTime         DateTime
+  price           Float
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([movieId])
+  @@unique([screenId])
+  @@unique([startTime])
+  @@unique([screenId, startTime])
 }
