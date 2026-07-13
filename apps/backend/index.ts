@@ -12,10 +12,12 @@ app.use(bodyParser.urlencoded({extended:true}))
 // Routers
 import {movieRouter} from "./routes/movie.routes"
 import { theaterRouter } from "./routes/theater.routes";
+import { theaterMovieRouter } from "./routes/theaterMovie.routes";
 
 //versions
 app.use("/api/v1/movies" , movieRouter);
 app.use("/api/v1/theaters", theaterRouter);
+app.use("/api/v1/theaters", theaterMovieRouter);
 
 // Central error handler — MUST come after all routes
 app.use(errorHandler);
