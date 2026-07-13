@@ -31,6 +31,7 @@ model Movie {
   releaseDate         DateTime
   director            String
   releaseStatus       ReleaseStatus     @default(RELEASED)
+  theaterMovies       TheaterMovie[]
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt   
 }
@@ -49,10 +50,30 @@ model Theater {
   totalScreens        Int               @default(1)
   amenities           String[] // e.g. ["Parking", "Food Court", "Wheelchair Access"]
   isActive            Boolean           @default(true)
+  theaterMovies       TheaterMovie[]
   screens             Screen[]
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 }
+
+// THEATER MOVIE
+
+model TheaterMovie {
+  id                  String            @id @default(cuid())
+
+  theaterId           String
+  theater             Theater           @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+
+  movieId             String          
+  movie               Movie             @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+
+  addedAt             DateTime          @default(now())
+
+  @@unique([theaterId, movieId])
+}
+
+
 
 // SCREEN
 enum ScreenType {
