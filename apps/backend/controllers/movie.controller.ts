@@ -105,6 +105,6 @@ export const MovieController : MovieControllerType = {
             if(!deleted){
                 return sendError(res, 404, "Movie not found")
             }
-            return sendSuccess (res, 200, "Movie deleted successfully")
+            return sendSuccess (res, 200, deleted, "Movie deleted successfully")
     })
 };

@@ -10,6 +10,6 @@ theaterRouter.get("/search", TheaterController.fetchTheater);
 
 // dynamic routes 
 theaterRouter.get("/:id", TheaterController.getTheaterById);
-theaterRouter.put("/:id", TheaterController.updateTheater);
+theaterRouter.patch("/:id", TheaterController.updateTheater);
 theaterRouter.delete("/:id", TheaterController.deleteTheater);
 

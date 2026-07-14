@@ -8,10 +8,11 @@ datasource db {
 }
 
 //
-// =========================
+// ======================================================
 // USER
-// =========================
+// ======================================================
 //
+
 enum UserRole {
   SYSTEM_ADMIN
   CLIENT
@@ -25,47 +26,52 @@ enum ClientStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  phone        String?
-  role         UserRole @default(CUSTOMER)
+  id             String      @id @default(cuid())
+  email          String      @unique
+  passwordHash   String
+  name           String
+  phone          String?
+  role           UserRole    @default(CUSTOMER)
 
-  ClientProfile Client?
+  // Relations
+  ClientProfile  Client?
+  bookings       Booking[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 //
-// =========================
-// Client
-// =========================
+// ======================================================
+// CLIENT
+// ======================================================
 //
 
 model Client {
-  id           String       @id @default(cuid())
-  userId       String       @unique
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessName String
-  status       ClientStatus @default(PENDING)
+  id               String          @id @default(cuid())
+  userId           String          @unique
 
-  approvedBy String?
-  approvedAt DateTime?
+  businessName     String
+  status           ClientStatus    @default(PENDING)
 
-  rejectionReason String?
+  approvedBy       String?
+  approvedAt       DateTime?
+  rejectionReason  String?
 
-  theaters Theater[]
+  // Relations
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theaters         Theater[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 //
-// =========================
+// ======================================================
 // MOVIE
-// =========================
+// ======================================================
 //
 
 enum ReleaseStatus {
@@ -75,83 +81,89 @@ enum ReleaseStatus {
 }
 
 model Movie {
-  id String @id @default(cuid())
+  id               String          @id @default(cuid())
 
-  name          String
-  description   String
-  casts         String[]
-  trailerUrl    String
-  language      String        @default("English")
-  releaseDate   DateTime
-  director      String
-  releaseStatus ReleaseStatus @default(RELEASED)
+  name             String
+  description      String
+  casts            String[]
+  director         String
+  trailerUrl       String
+  language         String          @default("English")
+  releaseDate      DateTime
+  releaseStatus    ReleaseStatus   @default(RELEASED)
 
-  theaterMovies TheaterMovie[]
-  showtimes     Showtime[]
+  // Relations
+  theaterMovies    TheaterMovie[]
+  showtimes        Showtime[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 //
-// =========================
+// ======================================================
 // THEATER
-// =========================
+// ======================================================
 //
 
 model Theater {
-  id String @id @default(cuid())
+  id               String          @id @default(cuid())
 
-  name        String
-  description String?
-  city        String
-  address     String
-  state       String?
-  pincode     String?
+  name             String
+  description      String?
 
-  latitude  Float?
-  longitude Float?
+  city             String
+  address          String
+  state            String?
+  pincode          String?
 
-  totalScreens Int      @default(1)
-  amenities    String[] // ["Parking", "Food Court", "Wheelchair Access"]
-  isActive     Boolean  @default(true)
+  latitude         Float?
+  longitude        Float?
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  totalScreens     Int             @default(1)
+  amenities        String[]
+  isActive         Boolean         @default(true)
 
-  theaterMovies TheaterMovie[]
-  screens       Screen[]
+  clientId         String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Relations
+  client           Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  theaterMovies    TheaterMovie[]
+  screens          Screen[]
+
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([clientId])
 }
 
 //
-// =========================
-// THEATER MOVIE (Junction)
-// =========================
+// ======================================================
+// THEATER MOVIE (JUNCTION TABLE)
+// ======================================================
 //
 
 model TheaterMovie {
-  id String @id @default(cuid())
+  id               String          @id @default(cuid())
 
-  theaterId String
-  theater   Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  theaterId        String
+  movieId          String
 
-  movieId String
-  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  // Relations
+  theater          Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  movie            Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-  addedAt DateTime @default(now())
+  addedAt          DateTime        @default(now())
 
   @@unique([theaterId, movieId])
 }
 
 //
-// =========================
+// ======================================================
 // SCREEN
-// =========================
+// ======================================================
 //
 
 enum ScreenType {
@@ -163,44 +175,195 @@ enum ScreenType {
 }
 
 model Screen {
-  id String @id @default(cuid())
+  id               String          @id @default(cuid())
 
-  name       String
-  totalSeats Int
-  screenType ScreenType @default(STANDARD)
+  name             String
+  totalSeats       Int
+  screenType       ScreenType      @default(STANDARD)
 
-  theaterId String
-  theater   Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  theaterId        String
 
-  showtimes Showtime[]
+  // Relations
+  theater          Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  showtimes        Showtime[]
+  seats            Seat[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
-  @@unique([theaterId, name]) // Prevent duplicate screen names within a theater
+  @@unique([theaterId, name])
 }
 
 //
-// =========================
+// ======================================================
+// SEAT
+// A physical seat that belongs to a screen. Seats are
+// created once per screen and reused across every
+// showtime scheduled on that screen.
+// ======================================================
+//
+
+enum SeatType {
+  STANDARD
+  PREMIUM
+  RECLINER
+  VIP
+}
+
+model Seat {
+  id               String          @id @default(cuid())
+
+  screenId         String
+  row              String          // e.g. "A", "B", "C"
+  number           Int             // e.g. 1, 2, 3
+  seatType         SeatType        @default(STANDARD)
+
+  // Relations
+  screen           Screen          @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  bookingSeats      BookingSeat[]
+  showtimeSeats     ShowtimeSeat[]
+
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // No two seats in the same screen can share the same row+number
+  @@unique([screenId, row, number])
+}
+
+//
+// ======================================================
 // SHOWTIME
-// =========================
+// ======================================================
 //
 
 model Showtime {
-  id String @id @default(cuid())
+  id               String          @id @default(cuid())
 
-  movieId String
-  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId          String
+  screenId         String
 
-  screenId String
-  screen   Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  startTime        DateTime
+  endTime          DateTime
 
-  startTime DateTime
-  endTime   DateTime
-  price     Float
+  // Base price for this showtime. Actual seat price can be
+  // overridden per seat-type via ShowtimeSeat.price below.
+  price            Float
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Relations
+  movie            Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  screen           Screen          @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  bookings         Booking[]
+  showtimeSeats    ShowtimeSeat[]
 
-  @@unique([screenId, startTime]) // prevents double-booking a screen at the exact same start time
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Prevents double-booking the same screen at the same start time
+  @@unique([screenId, startTime])
+}
+
+//
+// ======================================================
+// SHOWTIME SEAT
+// Represents the bookable/pricing state of a specific seat
+// for a specific showtime. This is what lets you charge
+// different prices per seat-type (e.g. VIP costs more than
+// Standard) for the same showtime, and is also the row you
+// mark CONFIRMED once a booking succeeds.
+// ======================================================
+//
+
+enum ShowtimeSeatStatus {
+  AVAILABLE
+  LOCKED      // temporarily held (e.g. Redis lock mirrored here, or during checkout)
+  BOOKED
+}
+
+model ShowtimeSeat {
+  id               String              @id @default(cuid())
+
+  showtimeId       String
+  seatId           String
+
+  price            Float               // price for this seat at this showtime (based on seatType tier)
+  status           ShowtimeSeatStatus  @default(AVAILABLE)
+
+  // Relations
+  showtime         Showtime            @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  seat             Seat                @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  bookingSeat      BookingSeat?
+
+  // Timestamps
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  // One row per seat per showtime — this is the row you lock/update
+  // when a customer selects a seat for that specific showtime.
+  @@unique([showtimeId, seatId])
+}
+
+//
+// ======================================================
+// BOOKING
+// A single customer transaction, which can cover multiple
+// seats for one showtime.
+// ======================================================
+//
+
+enum BookingStatus {
+  PENDING     // created, awaiting payment / confirmation
+  CONFIRMED   // payment succeeded, seats are locked in
+  CANCELLED   // user or system cancelled
+  EXPIRED     // PENDING booking that timed out (seat lock released)
+}
+
+model Booking {
+  id               String          @id @default(cuid())
+
+  userId           String
+  showtimeId       String
+
+  status           BookingStatus   @default(PENDING)
+  totalAmount      Float
+
+  // Relations
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showtime         Showtime        @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  bookingSeats     BookingSeat[]
+
+  // Timestamps
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([showtimeId])
+}
+
+//
+// ======================================================
+// BOOKING SEAT (JUNCTION TABLE)
+// Links a Booking to the specific ShowtimeSeat rows it
+// covers. Keeping this separate from Booking lets one
+// booking hold many seats, and the unique constraint below
+// is what ultimately prevents the same seat being sold
+// twice for the same showtime.
+// ======================================================
+//
+
+model BookingSeat {
+  id               String          @id @default(cuid())
+
+  bookingId        String
+  showtimeSeatId   String          @unique
+  seatId           String
+
+  // Relations
+  booking          Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  showtimeSeat     ShowtimeSeat    @relation(fields: [showtimeSeatId], references: [id], onDelete: Cascade)
+  seat             Seat            @relation(fields: [seatId], references: [id])
+
+  createdAt        DateTime        @default(now())
 }
