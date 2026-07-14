@@ -14,10 +14,18 @@ import {movieRouter} from "./routes/movie.routes"
 import { theaterRouter } from "./routes/theater.routes";
 import { theaterMovieRouter } from "./routes/theaterMovie.routes";
 
-//versions
+//versions of routes \\
+//movie
 app.use("/api/v1/movies" , movieRouter);
+
+//theater
 app.use("/api/v1/theaters", theaterRouter);
+
+//theaterMovie
 app.use("/api/v1/theaters", theaterMovieRouter);
+
+//Screen
+app.use("/api/v1/")
 
 // Central error handler — MUST come after all routes
 app.use(errorHandler);
