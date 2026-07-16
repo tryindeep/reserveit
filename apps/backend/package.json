@@ -4,8 +4,10 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
     "@types/body-parser": "^1.19.6",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/jsonwebtoken": "^9.0.10"
   },
   "scripts": {
     "dev": "bun --watch index.ts",
@@ -17,8 +19,10 @@
   "dependencies": {
     "@repo/db": "*",
     "@types/express": "^5.0.6",
+    "bcryptjs": "^3.0.3",
     "body-parser": "^2.3.0",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
   }
 }
