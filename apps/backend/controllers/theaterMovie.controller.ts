@@ -2,12 +2,7 @@ import type { RequestHandler } from "express"
 import { theaterMovieService } from "../services/theaterMovie.service"
 import { asyncHandler } from "../utils/asyncHandler"
 import { sendError, sendSuccess } from "../utils/responseBody"
-import z from "zod"
-
-
-const bulkAddMoviesSchema = z.object({
-  movieIds: z.array(z.string().min(1)).min(1, "At least one movie id is required"),
-});
+import { bulkAddMoviesSchema } from "../validators/theaterMovie.validator" 
 
 type TheaterMovieControllerType = {
             addMovieToTheater : RequestHandler,
