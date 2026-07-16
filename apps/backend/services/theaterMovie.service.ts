@@ -28,7 +28,28 @@ export const theaterMovieService = {
         });
         return {data : created};
     },
+    // bulk Add Movies To Theater
+    bulkAddMoviesToTheater: async (theaterId: string, movieIds: string[]) => {
+    const theater = await db.theater.findUnique({ where: { id: theaterId } });
+    if (!theater) return { error: "THEATER_NOT_FOUND" as const };
 
+    const results = await Promise.all(
+        movieIds.map(async (movieId) => {
+        const movie = await db.movie.findUnique({ where: { id: movieId } });
+        if (!movie) return { movieId, status: "MOVIE_NOT_FOUND" as const };
+
+        const existing = await db.theaterMovie.findUnique({
+            where: { theaterId_movieId: { theaterId, movieId } },
+        });
+        if (existing) return { movieId, status: "ALREADY_EXISTS" as const };
+
+        const created = await db.theaterMovie.create({ data: { theaterId, movieId } });
+        return { movieId, status: "ADDED" as const, data: created };
+        })
+    );
+
+    return { data: results };
+    },
     // REMOVE MOVIE FROM THE THEATER
     removeMovieFromTheater : async( theaterId : string, movieId : string) => {
         const existing = await  db.theaterMovie.findUnique({

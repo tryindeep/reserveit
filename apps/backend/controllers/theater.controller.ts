@@ -18,7 +18,13 @@ import z from "zod"
     isActive: z.boolean().default(true),
 });
 const updateTheaterSchema = createTheaterSchema.partial(); 
-
+const getTheatersQuerySchema = z.object({
+  city: z.string().min(1).optional(),
+  pincode: z.string().min(1).optional(),
+  name: z.string().min(1).optional(),
+  limit: z.coerce.number().int().positive().max(100).default(10),
+  offset: z.coerce.number().int().nonnegative().default(0),
+});
 type TheaterControllerType = {
     createTheater  : RequestHandler,
     updateTheater  : RequestHandler,
@@ -69,8 +75,12 @@ export const TheaterController : TheaterControllerType = {
         }),
         // Get all the THEATER
         getAllTheaters : asyncHandler(async ( req, res) => {
-                const theaters = await TheaterService.getAllTheaters();
-                return sendSuccess(res , 200, theaters)
+            const parsed = getTheatersQuerySchema.safeParse(req.query);
+            if(!parsed.success){
+                return sendError(res, 400, "Invalid Input", parsed.error.issues);
+            } 
+            const theaters = await TheaterService.getAllTheaters(parsed.data);
+            return sendSuccess(res , 200, theaters)
         }),
 
         // fetch THEATER by name

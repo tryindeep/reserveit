@@ -2,14 +2,20 @@ import type { RequestHandler } from "express"
 import { theaterMovieService } from "../services/theaterMovie.service"
 import { asyncHandler } from "../utils/asyncHandler"
 import { sendError, sendSuccess } from "../utils/responseBody"
+import z from "zod"
 
+
+const bulkAddMoviesSchema = z.object({
+  movieIds: z.array(z.string().min(1)).min(1, "At least one movie id is required"),
+});
 
 type TheaterMovieControllerType = {
-       addMovieToTheater : RequestHandler,
-       removeMovieFromTheater : RequestHandler,
-       getMoviesByTheater : RequestHandler,
-       getTheatersByMovie : RequestHandler
-}
+            addMovieToTheater : RequestHandler,
+            removeMovieFromTheater : RequestHandler,
+            getMoviesByTheater : RequestHandler,
+            getTheatersByMovie : RequestHandler,
+            bulkAddMoviesToTheater: RequestHandler 
+        }
 
 export const TheaterMovieController : TheaterMovieControllerType = {
 
@@ -38,7 +44,24 @@ export const TheaterMovieController : TheaterMovieControllerType = {
         return sendSuccess(res , 201, result.data, "Movie added to the theater Successfully")
     }),
 
-    // REMOVE MOVIE FROM THEATER
+
+    //  bulk Add Movies To Theater
+    bulkAddMoviesToTheater : asyncHandler(async(req , res) => {
+        const {theaterId} = req.params;
+         if(typeof theaterId !== "string" || !theaterId.trim()){
+            return sendError(res , 400, "Invalid Theater ID");
+        }
+        const parsed = bulkAddMoviesSchema.safeParse(req.body);
+        if(!parsed.success){
+            return sendError(res, 400, "Invalid Input", parsed.error.issues);
+        }
+        const result = await theaterMovieService.bulkAddMoviesToTheater(theaterId, parsed.data?.movieIds);
+        if ("error" in result) {
+            return sendError(res, 404, "Theater not found");
+        }
+        return sendSuccess(res, 201, result.data, "Bulk movie add processed");
+    }),
+
     removeMovieFromTheater : asyncHandler(async(req, res) => {
         const {movieId, theaterId} = req.params;
         if(typeof theaterId !== "string" || !theaterId.trim()){
