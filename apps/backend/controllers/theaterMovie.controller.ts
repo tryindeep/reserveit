@@ -50,7 +50,7 @@ export const TheaterMovieController : TheaterMovieControllerType = {
         if(!parsed.success){
             return sendError(res, 400, "Invalid Input", parsed.error.issues);
         }
-        const result = await theaterMovieService.bulkAddMoviesToTheater(theaterId, parsed.data?.movieIds);
+        const result = await theaterMovieService.bulkAddMoviesToTheater(theaterId, parsed.data.movieIds);
         if ("error" in result) {
             return sendError(res, 404, "Theater not found");
         }
