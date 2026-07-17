@@ -1,7 +1,6 @@
 import type { RequestHandler } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { sendError, sendSuccess } from "../utils/responseBody";
-import z from "zod";
 import { ScreenService } from "../services/screen.service";
 import { createScreenSchema, updateScreenSchema } from "../validators/screen.validator";
 

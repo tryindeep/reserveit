@@ -1,17 +1,19 @@
 
 import { db, Prisma } from "@repo/db";
 export  const TheaterService = {
-    createTheater : async(data : Prisma.TheaterCreateInput) => {
-        return db.theater.create({data})
-    },
-    
-    updateTheater : async(id : string , data : Prisma.TheaterUpdateInput) => {
-        const existingTheater = await db.theater.findUnique({
-            where: { id }
-        })
-        if(!existingTheater) return null;
-        return db.theater.update({where:{id}, data});
-    },
+    createTheater: async (clientId: string, data: Omit<Prisma.TheaterCreateInput, "client">) => {
+    return db.theater.create({
+        data: { ...data, client: { connect: { id: clientId } } },
+    });
+},
+
+updateTheater: async (id: string, clientId: string, data: Prisma.TheaterUpdateInput) => {
+    const existing = await db.theater.findUnique({ where: { id } });
+    if (!existing) return { error: "THEATER_NOT_FOUND" as const };
+    if (existing.clientId !== clientId) return { error: "FORBIDDEN" as const };
+    const updated = await db.theater.update({ where: { id }, data });
+    return { data: updated };
+},
 
     getTheaterById: async (id: string) => {
     return db.theater.findUnique({ where: { id } });
@@ -61,9 +63,11 @@ export  const TheaterService = {
             orderBy: { createdAt: "desc" },
         })
     },
-    deleteTheater : async(id:string) => {
-        const existingTheater = await db.theater.findUnique({ where: { id } });
-        if (!existingTheater) return null;
-        return db.theater.delete({where:{id}});
-    }
+    deleteTheater: async (id: string, clientId: string) => {
+    const existing = await db.theater.findUnique({ where: { id } });
+    if (!existing) return { error: "THEATER_NOT_FOUND" as const };
+    if (existing.clientId !== clientId) return { error: "FORBIDDEN" as const };
+    const deleted = await db.theater.delete({ where: { id } });
+    return { data: deleted };
+},
 }

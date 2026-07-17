@@ -20,7 +20,7 @@ export const TheaterController : TheaterControllerType = {
             if(!parsed.success){
                 return sendError(res , 400, "Invalid Input" , parsed.error.issues)
             }
-            const theater = await TheaterService.createTheater(parsed.data);
+            const theater = await TheaterService.createTheater(req.client!.id, parsed.data);
             return sendSuccess(res , 201, theater, "Successfully created the Theater");
         }),
 
@@ -34,11 +34,12 @@ export const TheaterController : TheaterControllerType = {
             if(!parsed.success){
                 return sendError(res , 400, "Invalid Input" , parsed.error.issues)
             }
-            const updatedTheaterData = await TheaterService.updateTheater(id,parsed.data)
-            if(!updatedTheaterData){
-                return sendError(res , 404, "Theater not found");
+            const result = await TheaterService.updateTheater(id, req.client!.id, parsed.data);
+            if("error" in result){
+                if(result.error === "THEATER_NOT_FOUND") return sendError(res, 404, "Theater not found");
+                if(result.error === "FORBIDDEN") return sendError(res, 403, "You do not own this theater");
             }
-            return sendSuccess(res, 200, updatedTheaterData, "Theater has been updated")
+            return sendSuccess(res, 200, result.data, "Theater has been updated")
         }),
 
         // get theater by ID
@@ -78,15 +79,16 @@ export const TheaterController : TheaterControllerType = {
         }),
 
         // Delete Theater 
-        deleteTheater : asyncHandler(async (req , res) => {
-            const { id } = req.params;
-            if (typeof id !== "string" || !id.trim()) {
-                return sendError(res, 400, "Invalid Theater Id");
-            }
-            const deleted = await TheaterService.deleteTheater(id);
-            if(!deleted){
-                return sendError(res, 404, "Theater not found")
-            }
-            return sendSuccess (res, 200,deleted, "Theater deleted successfully")
-    })
+    deleteTheater : asyncHandler(async (req , res) => {
+        const { id } = req.params;
+        if (typeof id !== "string" || !id.trim()) {
+            return sendError(res, 400, "Invalid Theater Id");
+        }
+        const result = await TheaterService.deleteTheater(id, req.client!.id);
+        if("error" in result){
+            if(result.error === "THEATER_NOT_FOUND") return sendError(res, 404, "Theater not found");
+            if(result.error === "FORBIDDEN") return sendError(res, 403, "You do not own this theater");
+        }
+        return sendSuccess (res, 200, result.data, "Theater deleted successfully")
+    }),
 }
