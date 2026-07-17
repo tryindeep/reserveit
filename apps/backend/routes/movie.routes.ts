@@ -1,14 +1,13 @@
 import { Router } from "express";
 import { MovieController } from "../controllers/movie.controller";
+import { authenticate } from "../middlewares/authenticate";
+import { authorize } from "../middlewares/authorize";
 export const movieRouter = Router();
 
-
-// static routes
-movieRouter.post("/" , MovieController.createMovie);
+movieRouter.post("/", authenticate, authorize("SYSTEM_ADMIN"), MovieController.createMovie);
 movieRouter.get("/", MovieController.getAllMovies);
 movieRouter.get("/search", MovieController.fetchMovies);
 
-// dynamic routes
 movieRouter.get("/:id", MovieController.getMovieById);
-movieRouter.patch("/:id", MovieController.updateMovie);
-movieRouter.delete("/:id", MovieController.deleteMovie);
+movieRouter.patch("/:id", authenticate, authorize("SYSTEM_ADMIN"), MovieController.updateMovie);
+movieRouter.delete("/:id", authenticate, authorize("SYSTEM_ADMIN"), MovieController.deleteMovie);
