@@ -64,7 +64,7 @@ export const ShowtimeService = {
 
         if(data.startTime){
             const durationMins = existing.movie.durationMins ?? DEFAULT_DURATION_MINS;
-            endTime = new Date(newStart.getTime() + durationMins * 60_000);
+            const endTime = new Date(newStart.getTime() + durationMins * 60_000);
             const overlapping = await db.showtime.findFirst({
                 where: { screenId: existing.screenId, id: { not: id }, AND: [{ startTime: { lt: endTime } }, { endTime: { gt: newStart } }] },
             })
