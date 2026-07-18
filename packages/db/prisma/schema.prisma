@@ -335,6 +335,7 @@ model Booking {
   showtime         Showtime        @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
   bookingSeats     BookingSeat[]
 
+  expiresAt        DateTime
   // Timestamps
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

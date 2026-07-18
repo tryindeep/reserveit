@@ -3,7 +3,7 @@ import { sendError, sendSuccess } from "../utils/responseBody"
 import { asyncHandler } from "../utils/asyncHandler";
 import { createShowtimeSchema, updatedShowtimeSchema } from "../validators/showtime.validator";
 import { ShowtimeService } from "../services/showtime.service";
-
+import { handleServiceError } from "../utils/errorMap";
 type ShowtimeControllerType = {
     getShowtimesByScreen : RequestHandler,
     getShowtimesByMovie : RequestHandler,
@@ -12,13 +12,6 @@ type ShowtimeControllerType = {
     updateShowtime : RequestHandler,
     deleteShowtime : RequestHandler
 }
-const handleError = (res: Response, error: string) => {
-  if (error === "SCREEN_NOT_FOUND") return sendError(res, 404, "Screen not found");
-  if (error === "MOVIE_NOT_FOUND") return sendError(res, 404, "Movie not found");
-  if (error === "SHOWTIME_NOT_FOUND") return sendError(res, 404, "Showtime not found");
-  if (error === "FORBIDDEN") return sendError(res, 403, "You do not own this screen");
-  if (error === "OVERLAP") return sendError(res, 409, "This screen already has a showtime overlapping this time range");
-};
 
 export const ShowtimeController : ShowtimeControllerType = {
 
@@ -29,7 +22,7 @@ export const ShowtimeController : ShowtimeControllerType = {
         const result = await ShowtimeService.createShowtime(req.client!.id , parsed.data);
         if ("error" in result) {
             const err = result.error;
-            if (typeof err === "string") return handleError(res, err);
+            if (typeof err === "string") return handleServiceError(res, result.error);
             return sendError(res, 500, "Unknown error");
         }
         return sendSuccess(res, 201, result.data , "Showtime created!");
@@ -68,7 +61,7 @@ export const ShowtimeController : ShowtimeControllerType = {
         const result = await ShowtimeService.updateShowtime(id, req.client!.id , parsed.data);
         if ("error" in result) {
             const err = result.error;
-            if (typeof err === "string") return handleError(res, err);
+            if (typeof err === "string") return handleServiceError(res, result.error);
             return sendError(res, 500, "Unknown error");
         }
         return sendSuccess(res, 200, result.data, "Showtime updated");
@@ -81,7 +74,7 @@ export const ShowtimeController : ShowtimeControllerType = {
         const result = await ShowtimeService.deleteShowtime(id, req.client!.id);
         if ("error" in result) {
             const err = result.error;
-            if (typeof err === "string") return handleError(res, err);
+            if (typeof err === "string") return handleServiceError(res, result.error);
             return sendError(res, 500, "Unknown error");
         }
         return sendSuccess(res, 200, result.data, "Showtime deleted");
