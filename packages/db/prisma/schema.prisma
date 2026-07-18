@@ -95,6 +95,7 @@ model Movie {
   // Relations
   theaterMovies    TheaterMovie[]
   showtimes        Showtime[]
+  durationMins     Int?
 
   // Timestamps
   createdAt        DateTime        @default(now())
