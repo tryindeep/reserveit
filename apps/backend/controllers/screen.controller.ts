@@ -33,6 +33,7 @@ export const ScreenController : ScreenControllerType = {
         }
         return sendSuccess(res , 201, result.data , "Screen Created!")
     }),
+
     getScreensByTheater : asyncHandler(async(req, res) => {
         const {theaterId} = req.params;
         if(typeof theaterId !== "string" || !theaterId.trim()){
@@ -41,6 +42,7 @@ export const ScreenController : ScreenControllerType = {
         const result = await ScreenService.getScreensByTheater(theaterId);
         return sendSuccess(res, 200, result)
     }),
+
     getScreenById : asyncHandler(async(req, res) => {
         const {id} = req.params;
         if(typeof id !== "string" || !id.trim()){
@@ -50,6 +52,7 @@ export const ScreenController : ScreenControllerType = {
         if (!screen) return sendError(res, 404, "Screen not Found");
         return sendSuccess(res,200,screen)
     }),
+
     updateScreen : asyncHandler(async(req, res) => {
         const {id} = req.params;
         if(typeof id !== "string" || !id.trim()){
@@ -66,6 +69,7 @@ export const ScreenController : ScreenControllerType = {
         }
         return sendSuccess(res, 200, result.data, "Screen Updated!")
     }),
+    
     deleteScreen : asyncHandler(async(req, res) => {
         const {id} = req.params;
         if(typeof id !== "string" || !id.trim()){

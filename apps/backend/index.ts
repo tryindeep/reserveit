@@ -13,6 +13,8 @@ app.use(bodyParser.urlencoded({extended:true}))
 import {movieRouter} from "./routes/movie.routes"
 import { theaterRouter } from "./routes/theater.routes";
 import { theaterMovieRouter } from "./routes/theaterMovie.routes";
+import { screenRouter } from "./routes/screen.routes";
+import { showtimeRouter } from "./routes/showtime.routes";
 
 //versions of routes \\
 //movie
@@ -25,7 +27,10 @@ app.use("/api/v1/theaters", theaterRouter);
 app.use("/api/v1/theaters", theaterMovieRouter);
 
 //Screen
-app.use("/api/v1/")
+app.use("/api/v1/" , screenRouter)
+
+//ShowTime
+app.use("api/v1/" , showtimeRouter)
 
 // Central error handler — MUST come after all routes
 app.use(errorHandler);
