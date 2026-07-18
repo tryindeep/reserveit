@@ -14,6 +14,6 @@ showtimeRouter.get("/showtimes/:id" , ShowtimeController.getShowtimeById);
 showtimeRouter.post("/showtimes" ,authenticate, authorize("CLIENT"), requireApprovedClient, ShowtimeController.createShowtime);
 showtimeRouter.patch("/showtimes/:id" ,authenticate, authorize("CLIENT"), requireApprovedClient, ShowtimeController.updateShowtime);
 showtimeRouter.delete("/showtimes/:id" ,authenticate, authorize("CLIENT"), requireApprovedClient, ShowtimeController.deleteShowtime);
-
+showtimeRouter.get("/showtimes/:id/seats", ShowtimeController.getShowtimeSeats);
 
 

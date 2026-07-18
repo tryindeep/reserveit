@@ -10,7 +10,8 @@ type ShowtimeControllerType = {
     getShowtimeById: RequestHandler,
     createShowtime : RequestHandler,
     updateShowtime : RequestHandler,
-    deleteShowtime : RequestHandler
+    deleteShowtime : RequestHandler,
+    getShowtimeSeats : RequestHandler,
 }
 
 export const ShowtimeController : ShowtimeControllerType = {
@@ -50,6 +51,12 @@ export const ShowtimeController : ShowtimeControllerType = {
         const showtime = await ShowtimeService.getShowtimeById(id);
         if (typeof showtime === "undefined" || showtime === null) return sendError(res, 404, "Showtime not found");
         return sendSuccess(res, 200, showtime);
+    }),
+    // add to showtime.controller.ts
+    getShowtimeSeats: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        if (typeof id !== "string" || !id.trim()) return sendError(res, 400, "Invalid Showtime Id");
+        return sendSuccess(res, 200, await ShowtimeService.getShowtimeSeats(id));
     }),
 
     // update Showtime

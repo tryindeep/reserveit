@@ -50,6 +50,14 @@ export const ShowtimeService = {
     getShowtimeById : async (id: string) =>{
          db.showtime.findUnique({ where: { id }, include: { movie: true, screen: { include: { theater: true } } } })
     },
+    // add to showtime.service.ts
+    getShowtimeSeats: async (showtimeId: string) => {
+        return db.showtimeSeat.findMany({
+            where: { showtimeId },
+            include: { seat: true },
+            orderBy: [{ seat: { row: "asc" } }, { seat: { number: "asc" } }],
+        });
+    },
 
     updateShowtime : async (id : string , clientId : string , data : {
             startTime? : Date;
