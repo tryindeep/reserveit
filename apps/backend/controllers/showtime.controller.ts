@@ -31,7 +31,7 @@ export const ShowtimeController : ShowtimeControllerType = {
 
     //get Showtimes By screen
     getShowtimesByScreen : asyncHandler(async(req , res) => {
-        const {screenId} = req.body;
+        const {screenId} = req.params;
         if (typeof screenId !== "string" || !screenId.trim()) return sendError(res, 400, "Invalid Screen Id");
         return sendSuccess(res, 200, await ShowtimeService.getShowtimesByScreen(screenId));
     }),

@@ -34,13 +34,13 @@ app.use("/api/v1/theaters", theaterMovieRouter);
 app.use("/api/v1/" , screenRouter);
 
 //ShowTime
-app.use("api/v1/" , showtimeRouter);
+app.use("/api/v1/" , showtimeRouter);
 
 // seat 
 app.use("/api/v1" , seatRouter);
 
 // bookings
-app.use("api/v1/bookings" , bookingRouter);
+app.use("/api/v1/bookings" , bookingRouter);
 
 // Sweep for abandoned holds every 60 seconds
 setInterval(async () => {

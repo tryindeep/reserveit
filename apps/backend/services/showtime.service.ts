@@ -37,18 +37,18 @@ export const ShowtimeService = {
     },
 
     getShowtimesByScreen : async (screenId : string) =>{
-        db.showtime.findMany({ where : {
+        return db.showtime.findMany({ where : {
             screenId
         }, orderBy : {startTime : "asc"}, include : {movie : true}})
     },
     getShowtimesByMovie : async (movieId : string) =>{
-        db.showtime.findMany({where : {movieId , startTime : {gte : new Date()}},
+        return db.showtime.findMany({where : {movieId , startTime : {gte : new Date()}},
             orderBy: {startTime: "asc"},
             include : {screen : { include : { theater : true}}}
         })
     },
     getShowtimeById : async (id: string) =>{
-         db.showtime.findUnique({ where: { id }, include: { movie: true, screen: { include: { theater: true } } } })
+        return db.showtime.findUnique({ where: { id }, include: { movie: true, screen: { include: { theater: true } } } })
     },
     // add to showtime.service.ts
     getShowtimeSeats: async (showtimeId: string) => {
@@ -70,12 +70,12 @@ export const ShowtimeService = {
         let endTime = existing.endTime;
         const newStart = data.startTime ?? existing.startTime;
 
-        if(data.startTime){
+        if (data.startTime) {
             const durationMins = existing.movie.durationMins ?? DEFAULT_DURATION_MINS;
-            const endTime = new Date(newStart.getTime() + durationMins * 60_000);
+            endTime = new Date(newStart.getTime() + durationMins * 60_000);  
             const overlapping = await db.showtime.findFirst({
                 where: { screenId: existing.screenId, id: { not: id }, AND: [{ startTime: { lt: endTime } }, { endTime: { gt: newStart } }] },
-            })
+            });
             if (overlapping) return { error: "OVERLAP" as const };
         }
         const updated = await db.showtime.update({ where: { id }, data: { startTime: newStart, endTime, price: data.price ?? existing.price } });
