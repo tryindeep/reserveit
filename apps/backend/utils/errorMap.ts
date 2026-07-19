@@ -26,6 +26,9 @@ const ERROR_MAP: Record<string, [number, string]> = {
 
   EMAIL_EXISTS: [409, "An account with this email already exists"],
   INVALID_CREDENTIALS: [401, "Invalid email or password"],
+
+  CLIENT_NOT_FOUND: [404, "Client not found"],
+  ALREADY_PROCESSED: [409, "This client has already been approved or rejected"],
 };
 
 export const handleServiceError = (res: Response, error: string) => {

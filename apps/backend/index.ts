@@ -19,6 +19,7 @@ import { seatRouter } from "./routes/seat.routes";
 import { bookingRouter } from "./routes/booking.routes";
 //service 
 import { BookingService } from "./services/booking.service";
+import { clientRouter } from "./routes/client.routes";
 
 //versions of routes \\
 //movie
@@ -41,6 +42,8 @@ app.use("/api/v1" , seatRouter);
 
 // bookings
 app.use("/api/v1/bookings" , bookingRouter);
+
+app.use("/api/v1/clients", clientRouter);
 
 // Sweep for abandoned holds every 60 seconds
 setInterval(async () => {

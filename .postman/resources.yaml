@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 1185e914-deca-444d-b79a-f328c643ae6e
+
+localResources:
+  collections:
+    - ../Reservit.postman_collection.json
