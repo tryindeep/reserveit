@@ -16,6 +16,9 @@ import { theaterMovieRouter } from "./routes/theaterMovie.routes";
 import { screenRouter } from "./routes/screen.routes";
 import { showtimeRouter } from "./routes/showtime.routes";
 import { seatRouter } from "./routes/seat.routes";
+import { bookingRouter } from "./routes/booking.routes";
+//service 
+import { BookingService } from "./services/booking.service";
 
 //versions of routes \\
 //movie
@@ -28,13 +31,26 @@ app.use("/api/v1/theaters", theaterRouter);
 app.use("/api/v1/theaters", theaterMovieRouter);
 
 //Screen
-app.use("/api/v1/" , screenRouter)
+app.use("/api/v1/" , screenRouter);
 
 //ShowTime
-app.use("api/v1/" , showtimeRouter)
+app.use("api/v1/" , showtimeRouter);
 
 // seat 
-app.use("/api/v1" , seatRouter)
+app.use("/api/v1" , seatRouter);
+
+// bookings
+app.use("api/v1/bookings" , bookingRouter);
+
+// Sweep for abandoned holds every 60 seconds
+setInterval(async () => {
+  try {
+    const count = await BookingService.expireStaleBookings();
+    if(count > 0) console.log(`Expired ${count} stale booking(s)`);
+  } catch (error) {
+    console.error("Error while expiring stale bookings:", error);
+  }
+}, 60_000);
 
 // Central error handler — MUST come after all routes
 app.use(errorHandler);

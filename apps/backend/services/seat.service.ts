@@ -10,9 +10,12 @@ export const SeatService = {
             const existingCount = await db.seat.count({where : {screenId}});
             if(existingCount > 0) return { error: "SEATS_ALREADY_EXIST" as const };
 
-            const rowLetters =  Array.from({ length: rows }, (_, i) => String.fromCharCode(65 + i));
+            const rowLetters =  Array.from({ length: rows }, 
+                                    (_, i) => String.fromCharCode(65 + i));
             const seatData = rowLetters.flatMap((row) => 
-                Array.from({ length: seatsPerRow }, (_, i) => ({ screenId, row, number: i + 1, seatType: seatType as any }))
+                Array.from({ length: seatsPerRow }, (_, i) => ({ 
+                    screenId, row, number: i + 1, seatType: seatType as any 
+                }))
             );
             await db.seat.createMany({data : seatData});
             const created = await db.seat.findMany({where : {screenId}, orderBy: [{row : "asc"}, {number : "asc"}]})

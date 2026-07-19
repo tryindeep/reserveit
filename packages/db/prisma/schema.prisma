@@ -26,20 +26,20 @@ enum ClientStatus {
 }
 
 model User {
-  id             String      @id @default(cuid())
-  email          String      @unique
-  passwordHash   String
-  name           String
-  phone          String?
-  role           UserRole    @default(CUSTOMER)
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole @default(CUSTOMER)
 
   // Relations
-  ClientProfile  Client?
-  bookings       Booking[]
+  ClientProfile Client?
+  bookings      Booking[]
 
   // Timestamps
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //
@@ -49,23 +49,23 @@ model User {
 //
 
 model Client {
-  id               String          @id @default(cuid())
-  userId           String          @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  businessName     String
-  status           ClientStatus    @default(PENDING)
+  businessName String
+  status       ClientStatus @default(PENDING)
 
-  approvedBy       String?
-  approvedAt       DateTime?
-  rejectionReason  String?
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionReason String?
 
   // Relations
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theaters         Theater[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theaters Theater[]
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //
@@ -81,25 +81,25 @@ enum ReleaseStatus {
 }
 
 model Movie {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  name             String
-  description      String
-  casts            String[]
-  director         String
-  trailerUrl       String
-  language         String          @default("English")
-  releaseDate      DateTime
-  releaseStatus    ReleaseStatus   @default(RELEASED)
+  name          String
+  description   String
+  casts         String[]
+  director      String
+  trailerUrl    String
+  language      String        @default("English")
+  releaseDate   DateTime
+  releaseStatus ReleaseStatus @default(RELEASED)
 
   // Relations
-  theaterMovies    TheaterMovie[]
-  showtimes        Showtime[]
-  durationMins     Int?
+  theaterMovies TheaterMovie[]
+  showtimes     Showtime[]
+  durationMins  Int?
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //
@@ -109,33 +109,33 @@ model Movie {
 //
 
 model Theater {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  name             String
-  description      String?
+  name        String
+  description String?
 
-  city             String
-  address          String
-  state            String?
-  pincode          String?
+  city    String
+  address String
+  state   String?
+  pincode String?
 
-  latitude         Float?
-  longitude        Float?
+  latitude  Float?
+  longitude Float?
 
-  totalScreens     Int             @default(1)
-  amenities        String[]
-  isActive         Boolean         @default(true)
+  totalScreens Int      @default(1)
+  amenities    String[]
+  isActive     Boolean  @default(true)
 
-  clientId         String
+  clientId String
 
   // Relations
-  client           Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  theaterMovies    TheaterMovie[]
-  screens          Screen[]
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  theaterMovies TheaterMovie[]
+  screens       Screen[]
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([clientId])
 }
@@ -147,16 +147,16 @@ model Theater {
 //
 
 model TheaterMovie {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  theaterId        String
-  movieId          String
+  theaterId String
+  movieId   String
 
   // Relations
-  theater          Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
-  movie            Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  theater Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  movie   Movie   @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-  addedAt          DateTime        @default(now())
+  addedAt DateTime @default(now())
 
   @@unique([theaterId, movieId])
 }
@@ -176,22 +176,22 @@ enum ScreenType {
 }
 
 model Screen {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  name             String
-  totalSeats       Int
-  screenType       ScreenType      @default(STANDARD)
+  name       String
+  totalSeats Int
+  screenType ScreenType @default(STANDARD)
 
-  theaterId        String
+  theaterId String
 
   // Relations
-  theater          Theater         @relation(fields: [theaterId], references: [id], onDelete: Cascade)
-  showtimes        Showtime[]
-  seats            Seat[]
+  theater   Theater    @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  showtimes Showtime[]
+  seats     Seat[]
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([theaterId, name])
 }
@@ -213,21 +213,21 @@ enum SeatType {
 }
 
 model Seat {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  screenId         String
-  row              String          // e.g. "A", "B", "C"
-  number           Int             // e.g. 1, 2, 3
-  seatType         SeatType        @default(STANDARD)
+  screenId String
+  row      String // e.g. "A", "B", "C"
+  number   Int // e.g. 1, 2, 3
+  seatType SeatType @default(STANDARD)
 
   // Relations
-  screen           Screen          @relation(fields: [screenId], references: [id], onDelete: Cascade)
-  bookingSeats      BookingSeat[]
-  showtimeSeats     ShowtimeSeat[]
+  screen        Screen         @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  bookingSeats  BookingSeat[]
+  showtimeSeats ShowtimeSeat[]
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // No two seats in the same screen can share the same row+number
   @@unique([screenId, row, number])
@@ -240,27 +240,27 @@ model Seat {
 //
 
 model Showtime {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  movieId          String
-  screenId         String
+  movieId  String
+  screenId String
 
-  startTime        DateTime
-  endTime          DateTime
+  startTime DateTime
+  endTime   DateTime
 
   // Base price for this showtime. Actual seat price can be
   // overridden per seat-type via ShowtimeSeat.price below.
-  price            Float
+  price Float
 
   // Relations
-  movie            Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  screen           Screen          @relation(fields: [screenId], references: [id], onDelete: Cascade)
-  bookings         Booking[]
-  showtimeSeats    ShowtimeSeat[]
+  movie         Movie          @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  screen        Screen         @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  bookings      Booking[]
+  showtimeSeats ShowtimeSeat[]
 
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Prevents double-booking the same screen at the same start time
   @@unique([screenId, startTime])
@@ -279,27 +279,27 @@ model Showtime {
 
 enum ShowtimeSeatStatus {
   AVAILABLE
-  LOCKED      // temporarily held (e.g. Redis lock mirrored here, or during checkout)
+  LOCKED // temporarily held (e.g. Redis lock mirrored here, or during checkout)
   BOOKED
 }
 
 model ShowtimeSeat {
-  id               String              @id @default(cuid())
+  id String @id @default(cuid())
 
-  showtimeId       String
-  seatId           String
+  showtimeId String
+  seatId     String
 
-  price            Float               // price for this seat at this showtime (based on seatType tier)
-  status           ShowtimeSeatStatus  @default(AVAILABLE)
+  price  Float // price for this seat at this showtime (based on seatType tier)
+  status ShowtimeSeatStatus @default(AVAILABLE)
 
   // Relations
-  showtime         Showtime            @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
-  seat             Seat                @relation(fields: [seatId], references: [id], onDelete: Cascade)
-  bookingSeat      BookingSeat?
+  showtime    Showtime     @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  seat        Seat         @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  bookingSeat BookingSeat?
 
   // Timestamps
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // One row per seat per showtime — this is the row you lock/update
   // when a customer selects a seat for that specific showtime.
@@ -315,30 +315,30 @@ model ShowtimeSeat {
 //
 
 enum BookingStatus {
-  PENDING     // created, awaiting payment / confirmation
-  CONFIRMED   // payment succeeded, seats are locked in
-  CANCELLED   // user or system cancelled
-  EXPIRED     // PENDING booking that timed out (seat lock released)
+  PENDING // created, awaiting payment / confirmation
+  CONFIRMED // payment succeeded, seats are locked in
+  CANCELLED // user or system cancelled
+  EXPIRED // PENDING booking that timed out (seat lock released)
 }
 
 model Booking {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId           String
-  showtimeId       String
+  userId     String
+  showtimeId String
 
-  status           BookingStatus   @default(PENDING)
-  totalAmount      Float
+  status      BookingStatus @default(PENDING)
+  totalAmount Float
 
   // Relations
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  showtime         Showtime        @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
-  bookingSeats     BookingSeat[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showtime     Showtime      @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  bookingSeats BookingSeat[]
 
-  expiresAt        DateTime
+  expiresAt DateTime
   // Timestamps
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([showtimeId])
@@ -356,16 +356,16 @@ model Booking {
 //
 
 model BookingSeat {
-  id               String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  bookingId        String
-  showtimeSeatId   String          @unique
-  seatId           String
+  bookingId      String
+  showtimeSeatId String @unique
+  seatId         String
 
   // Relations
-  booking          Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  showtimeSeat     ShowtimeSeat    @relation(fields: [showtimeSeatId], references: [id], onDelete: Cascade)
-  seat             Seat            @relation(fields: [seatId], references: [id])
+  booking      Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  showtimeSeat ShowtimeSeat @relation(fields: [showtimeSeatId], references: [id], onDelete: Cascade)
+  seat         Seat         @relation(fields: [seatId], references: [id])
 
-  createdAt        DateTime        @default(now())
+  createdAt DateTime @default(now())
 }
