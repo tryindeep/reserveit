@@ -4,7 +4,6 @@ import { BookingService } from "../services/booking.service"
 import { handleServiceError } from "../utils/errorMap"
 import { holdBookingSchema } from "../validators/booking.validator"
 import { asyncHandler } from "../utils/asyncHandler"
-import { parse } from "dotenv"
 
 type BookingControllerType = {
     holdSeats : RequestHandler
@@ -15,28 +14,29 @@ type BookingControllerType = {
 }
 
 export const BookingController : BookingControllerType = {
-    holdSeats : asyncHandler(async(req , res) => {
+    holdSeats: asyncHandler(async (req, res) => {
         const parsed = holdBookingSchema.safeParse(req.body);
-        if(!parsed.success) return sendError(res, 400, "Invalid Input");
+        if (!parsed.success) return sendError(res, 400, "Invalid Input");
+        const result = await BookingService.holdSeats(req.user!.userId, parsed.data.showtimeId, parsed.data.seatIds);
+        if ("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
+        return sendSuccess(res, 201, result.data, "Seat held. Complete payment within 5 minutes.");
+    }),
+    confirmBooking: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        if (typeof id !== "string" || !id.trim()) return sendError(res, 400, "Invalid Booking Id");
+        const result = await BookingService.confirmBooking(id, req.user!.userId);
+        if ("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
+        return sendSuccess(res, 200, result.data, "Booking Confirmed!");
+    }),
 
-        const result = await BookingService.holdSeats(req.user!.userId , parsed.data.showtimeId,parsed.data.seatIds );
-        if("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
-        return sendSuccess(res , 201, "Seat held Complete payment within 5 minutes. ")
-    }),
-    confirmBooking : asyncHandler(async(req , res) => {
-        const {id} = req.params;
+    cancelBooking: asyncHandler(async (req, res) => {
+        const { id } = req.params;
         if (typeof id !== "string" || !id.trim()) return sendError(res, 400, "Invalid Booking Id");
-        const result = await BookingService.confirmBooking(id , req.user!.userId);
-        if("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
-        return sendSuccess(res , 200, "Booking Confirmed!")
+        const result = await BookingService.cancelBooking(id, req.user!.userId);
+        if ("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
+        return sendSuccess(res, 200, result.data, "Booking Cancelled!");
     }),
-    cancelBooking : asyncHandler(async(req , res) => {
-        const {id} = req.params;
-        if (typeof id !== "string" || !id.trim()) return sendError(res, 400, "Invalid Booking Id");
-        const result = await BookingService.cancelBooking(id , req.user!.userId);
-        if("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
-        return sendSuccess(res , 200, "Booking Confirmed!")
-    }),
+
     getBookingById : asyncHandler(async(req , res) => {
         const { id } = req.params;
     if (typeof id !== "string" || !id.trim()) return sendError(res, 400, "Invalid Booking Id");

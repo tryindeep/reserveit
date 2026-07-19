@@ -27,6 +27,8 @@
     "packages/*"
   ],
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
     "zod": "^4.4.3"
   }
 }

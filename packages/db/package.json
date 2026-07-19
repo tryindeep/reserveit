@@ -1,7 +1,10 @@
 {
   "name": "@repo/db",
-   "exports": {
+  "exports": {
     ".": "./index.ts"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   },
   "module": "index.ts",
   "type": "module",
@@ -19,6 +22,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "pg": "^8.22.0"
   }
