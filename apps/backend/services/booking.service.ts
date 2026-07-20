@@ -97,6 +97,18 @@ export const BookingService = {
         if (booking.userId !== userId) return { error: "FORBIDDEN" as const };
         return { data: booking }
     },
+    confirmBookingInternal : async(bookingId : string) => {
+        const booking = await db.booking.findUnique({ where: { id: bookingId } });
+        if (!booking) return { error: "BOOKING_NOT_FOUND" as const };
+        if (booking.status !== "PENDING") return { error: "NOT_PENDING" as const };
+
+        const updated = await db.$transaction(async(tx)=> {
+            const b = await tx.booking.update({where : {id: bookingId}, data : {status : "CONFIRMED"}});
+            await tx.showtimeSeat.updateMany({where : {bookingSeat : {bookingId}}, data: {status : "BOOKED"}});
+            return b;
+        });
+        return {data : updated}
+    },
 
     // important
     expireStaleBookings: async() => {
@@ -174,3 +186,45 @@ async function releaseBookingSeats(bookingId:string) {
 // Expiration mechanism: Prevents abandoned bookings from blocking seats indefinitely.
 
 // Overall, this is a solid backend pattern for handling movie ticket reservations where concurrency and data consistency are critical.
+
+
+
+// Customer
+//     │
+//     │ Select seats
+//     ▼
+// BookingService.holdSeats()
+//     │
+//     ├── Create Booking (PENDING)
+//     ├── Create BookingSeat rows
+//     └── Lock ShowtimeSeat rows
+//     │
+//     ▼
+// Frontend
+//     │
+//     │ POST /create-order
+//     ▼
+// PaymentService.createOrder()
+//     │
+//     ├── Validate booking
+//     ├── Create Razorpay Order
+//     └── Save Payment (CREATED)
+//     │
+//     ▼
+// Razorpay Checkout
+//     │
+//     │ Customer pays
+//     ▼
+// Razorpay
+//     ├── Returns payment details to frontend
+//     └── Sends signed webhook to backend
+//                │
+//                ▼
+// handleRazorpayWebhook()
+//                │
+//                ├── Verify webhook signature
+//                ├── Mark Payment = PAID
+//                └── BookingService.confirmBookingInternal()
+//                            │
+//                            ├── Booking → CONFIRMED
+//                            └── ShowtimeSeat → BOOKED
