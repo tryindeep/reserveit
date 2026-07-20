@@ -23,7 +23,7 @@ export const ScreenController: ScreenControllerType = {
 
     const result = await ScreenService.createScreen(theaterId, req.client!.id, parsed.data);
     if ("error" in result) return handleServiceError(res, result.error ?? "Unknown Error");
-    return sendSuccess(res, 201, result.data, "Screen Created!");
+    return sendSuccess(res, 201, result.data, "Screen Created");
   }),
 
   getScreensByTheater: asyncHandler(async (req, res) => {
