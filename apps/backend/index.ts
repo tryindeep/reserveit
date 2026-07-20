@@ -5,6 +5,10 @@ import { db } from "@repo/db";
 import { errorHandler } from "./utils/errorHandler";
 const app = express();
 
+
+// Webhook router FIRST — needs raw body, must run before bodyParser.json()
+import { webhookRouter } from "./routes/webhook.routes";
+app.use("/api/v1/webhooks", webhookRouter);
 // configuring a body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))
@@ -20,6 +24,7 @@ import { bookingRouter } from "./routes/booking.routes";
 //service 
 import { BookingService } from "./services/booking.service";
 import { clientRouter } from "./routes/client.routes";
+import { paymentRouter } from "./routes/payment.routes";
 
 //versions of routes \\
 //movie
@@ -43,7 +48,11 @@ app.use("/api/v1" , seatRouter);
 // bookings
 app.use("/api/v1/bookings" , bookingRouter);
 
+//client 
 app.use("/api/v1/clients", clientRouter);
+
+//payment
+app.use("/api/v1/payments", paymentRouter);
 
 // Sweep for abandoned holds every 60 seconds
 setInterval(async () => {

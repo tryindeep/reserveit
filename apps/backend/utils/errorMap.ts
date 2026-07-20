@@ -10,7 +10,7 @@ const ERROR_MAP: Record<string, [number, string]> = {
   SEAT_NOT_FOUND: [404, "Seat not found"],
   BOOKING_NOT_FOUND: [404, "Booking not found"],
   NOT_FOUND: [404, "Resource not found"],
-
+  PAYMENT_NOT_FOUND: [404, "Payment not found"],
   FORBIDDEN: [403, "You do not have permission to perform this action"],
 
   ALREADY_EXISTS: [409, "This resource already exists"],
