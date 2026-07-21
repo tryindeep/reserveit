@@ -66,12 +66,12 @@ export const BookingService = {
             return { error: "EXPIRED" as const };
         }
         const updated = await db.$transaction(async(tx) => {
-            await tx.booking.update({where : {id : bookingId} , data : {status : "CONFIRMED"}});
+            const b = await tx.booking.update({where : {id : bookingId} , data : {status : "CONFIRMED"}});
             await tx.showtimeSeat.updateMany({
                 where : { bookingSeat : {bookingId}},
                 data : {status : "BOOKED"}
             })
-            return booking;
+            return b;
         });
         return {data : updated}
     },

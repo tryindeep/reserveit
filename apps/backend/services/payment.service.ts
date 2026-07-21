@@ -5,7 +5,7 @@ import { BookingService } from "./booking.service";
 
 const razorpay = new Razorpay ({
     key_id : process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_SECRET
+    key_secret: process.env.RAZORPAY_KEY_SECRET
 })
 
 export const PaymentService = {
@@ -24,8 +24,7 @@ export const PaymentService = {
         // upsert means insert and update
         await db.payment.upsert({
             where : {bookingId},
-            create : {bookingId , razorpayOrderId : order.id, amount : booking.totalAmount , 
-                        currency : order.currency, keyId : process.env.RAZORPAY_KEY_ID},
+            create : {bookingId , razorpayOrderId : order.id, amount : booking.totalAmount , status : "CREATED"},
             update : { razorpayOrderId : order.id , status : "CREATED"}
         });
         // BACKEND RETURNS

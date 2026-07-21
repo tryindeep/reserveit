@@ -1,14 +1,20 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import bodyParser from "body-parser"
 import { db } from "@repo/db";
 import { errorHandler } from "./utils/errorHandler";
 const app = express();
 
 
+
+
 // Webhook router FIRST — needs raw body, must run before bodyParser.json()
 import { webhookRouter } from "./routes/webhook.routes";
 app.use("/api/v1/webhooks", webhookRouter);
+
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
 // configuring a body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))

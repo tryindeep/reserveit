@@ -4,5 +4,5 @@ import { authenticate } from "../middlewares/authenticate";
 export const paymentRouter = Router();
 
 paymentRouter.use(authenticate);
-paymentRouter.use("/bookings/:id/create-order" , PaymentController.createOrder);
-paymentRouter.use("/verify" , PaymentController.verifyPayment);
+paymentRouter.post("/bookings/:id/create-order" , PaymentController.createOrder);
+paymentRouter.post("/verify" , PaymentController.verifyPayment);
