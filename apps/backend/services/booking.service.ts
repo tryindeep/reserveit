@@ -1,4 +1,5 @@
 import { db , Prisma } from "@repo/db"
+import { redis } from "../utils/redis";
 
 
 const HOLD_DURATION_MS = 5 * 60_000;
@@ -8,10 +9,25 @@ export const BookingService = {
         const showtime = await db.showtime.findUnique({ where: { id: showtimeId } });
         if (!showtime) return { error: "SHOWTIME_NOT_FOUND" as const };
 
+        // Redis lock — fast pre-check before touching Postgres at all
+        const lockKeys = seatIds.map((seatId) => `seat-lock:${showtimeId}:${seatId}`);
+        const acquiredKeys : string[] = [];
+
+        for(const key of lockKeys){
+            const acquired = await redis.set(key , userId, "EX" , 300, "NX");
+            if(!acquired){
+                if(acquiredKeys.length > 0) await redis.del(...acquiredKeys);
+                return {error : "SEAT_ALREADY_TAKEN" as const}
+            }
+            acquiredKeys.push(key);
+        }
         const showtimeSeats = await db.showtimeSeat.findMany({
         where: { showtimeId, seatId: { in: seatIds } },
         });
-        if (showtimeSeats.length !== seatIds.length) return { error: "INVALID_SEATS" as const };
+        if (showtimeSeats.length !== seatIds.length){
+            await redis.del(...acquiredKeys); // release locks, request is invalid
+            return { error: "INVALID_SEATS" as const };
+        } 
 
         const alreadyTaken = showtimeSeats.filter((s) => s.status !== "AVAILABLE");
         if (alreadyTaken.length > 0) return { error: "SEAT_ALREADY_TAKEN" as const };
@@ -50,7 +66,8 @@ export const BookingService = {
         return { data: booking }
         // P2002 Prisma unique constraint error.
         } catch (err: any) {
-        if (err.code === "P2002" || err.code === "RACE_LOST") return { error: "SEAT_ALREADY_TAKEN" as const };
+            await redis.del(...acquiredKeys); // Postgres lost the race — release Redis locks too
+            if (err.code === "P2002" || err.code === "RACE_LOST") return { error: "SEAT_ALREADY_TAKEN" as const };
         throw err;
         }
     },
@@ -73,6 +90,7 @@ export const BookingService = {
             })
             return b;
         });
+        await releaseSeatLocks(bookingId)
         return {data : updated}
     },
     cancelBooking : async(bookingId : string, userId : string) => {
@@ -107,6 +125,7 @@ export const BookingService = {
             await tx.showtimeSeat.updateMany({where : {bookingSeat : {bookingId}}, data: {status : "BOOKED"}});
             return b;
         });
+        await releaseSeatLocks(bookingId); 
         return {data : updated}
     },
 
@@ -126,13 +145,23 @@ export const BookingService = {
     },
 };
 
+// Releases the Postgres seat status AND the Redis lock together
 async function releaseBookingSeats(bookingId:string) {
     await db.showtimeSeat.updateMany({
         where: {bookingSeat : {bookingId}},
         data: {status : "AVAILABLE"}
     });
+       await releaseSeatLocks(bookingId); 
 }
-
+// / Just the Redis half — used when Postgres state doesn't need to change (e.g. booking just confirmed)
+async function releaseSeatLocks(bookingId :string){
+    const bookingSeats = await db.bookingSeat.findMany({
+        where : {bookingId},
+        include: {showtimeSeat : true}
+    });
+    const keys = bookingSeats.map((bs) => `seat-lock:${bs.showtimeSeat.showtimeId}:${bs.seatId}`);
+    if(keys.length > 0) await redis.del(...keys);
+}
 
 // COMPLETED Booking LIfe circle 
 
