@@ -3,7 +3,6 @@ import { SeatController } from "../controllers/seat.controller";
 import { authenticate } from "../middlewares/authenticate";
 import { authorize } from "../middlewares/authorize";
 import { requireApprovedClient } from "../middlewares/requiredApprovalClient";
-import { ScreenController } from "../controllers/screen.controller";
 export const seatRouter = Router();
 
 

@@ -10,4 +10,4 @@ export const createShowtimeSchema = z.object({
 export const updatedShowtimeSchema = z.object({
     startTime: z.coerce.date(),
     price: z.number().positive()
-});
+}).partial();

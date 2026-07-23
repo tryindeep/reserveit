@@ -22,8 +22,7 @@ export const ShowtimeController : ShowtimeControllerType = {
         if(!parsed.success) return sendError(res , 400, "Invalid Input", parsed.error.issues);
         const result = await ShowtimeService.createShowtime(req.client!.id , parsed.data);
         if ("error" in result) {
-            const err = result.error;
-            if (typeof err === "string") return handleServiceError(res, result.error);
+            if (typeof result.error === "string") return handleServiceError(res, result.error);
             return sendError(res, 500, "Unknown error");
         }
         return sendSuccess(res, 201, result.data , "Showtime created!");

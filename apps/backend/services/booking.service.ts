@@ -1,8 +1,8 @@
 import { db , Prisma } from "@repo/db"
 import { redis } from "../utils/redis";
 
-
-const HOLD_DURATION_MS = 5 * 60_000;
+const HOLD_DURATION_SECONDS = 300;
+const HOLD_DURATION_MS = HOLD_DURATION_SECONDS * 1000;
 
 export const BookingService = {
      holdSeats: async (userId: string, showtimeId: string, seatIds: string[]) => {

@@ -16,7 +16,7 @@ type BookingControllerType = {
 export const BookingController : BookingControllerType = {
     holdSeats: asyncHandler(async (req, res) => {
         const parsed = holdBookingSchema.safeParse(req.body);
-        if (!parsed.success) return sendError(res, 400, "Invalid Input");
+        if (!parsed.success) return sendError(res, 400, parsed.error.message);
         const result = await BookingService.holdSeats(req.user!.userId, parsed.data.showtimeId, parsed.data.seatIds);
         if ("error" in result) return handleServiceError(res, result.error ?? "Unknown error");
         return sendSuccess(res, 201, result.data, "Seat held. Complete payment within 5 minutes.");
