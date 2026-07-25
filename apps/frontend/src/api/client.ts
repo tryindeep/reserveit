@@ -1,27 +1,25 @@
 import axios from "axios";
 
-import { useAuthStore } from "../store/authStore";
-
 export const apiClient = axios.create({
-    baseURL:"http://localhost:4000/api/v1", 
-})
-
+  baseURL : import.meta.env.VITE_API_BASE_URL,
+});
 
 apiClient.interceptors.request.use((config) => {
-    const token = useAuthStore.getState().token;
-    if(token){
-        config.headers.Authorization=`Bearer ${token}`;
-    }
-    return config;
-})
+  const token = localStorage.getItem("token");
+  if(token){
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config;
+});
 
-// If the backend ever returns 401, log the user out automatically
-apiClient.interceptors.response.use(
-  (response) => response,
+apiClient.interceptors.response.use(   
+  (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+    if(error.response?.status === 401){
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login"; 
     }
     return Promise.reject(error);
   }
-);
+)
