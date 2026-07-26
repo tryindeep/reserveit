@@ -7,6 +7,6 @@ export const getAllMovies = async () => {
 }
 
 export const getMovieById = async(id : string) => {
-    const res = await apiClient.get<ApiResponse<Movie[]>>(`/movies/${id}`);
-    res.data.data;
+    const res = await apiClient.get<ApiResponse<Movie>>(`/movies/${id}`);
+    return res.data.data;
 }
