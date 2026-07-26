@@ -8,7 +8,7 @@ export const ProtectedRoute = ({children} : {children : ReactNode}) => {
     if(!token) return <Navigate to="/login" replace></Navigate>
     return (
         <>
-            {children}
+        {children}
         </>
     )
 }

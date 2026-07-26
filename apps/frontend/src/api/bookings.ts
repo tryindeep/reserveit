@@ -2,7 +2,7 @@ import type { ApiResponse, Booking } from "../types/types"
 import { apiClient } from "./client"
 
 
-export const holdSeats = async (showtimeId : string, seatIds : string) => {
+export const holdSeats = async (showtimeId : string, seatIds : string[]) => {
     const res = await apiClient.post<ApiResponse<Booking>>("/bookings/hold" , {showtimeId , seatIds});
     return res.data.data;
 }

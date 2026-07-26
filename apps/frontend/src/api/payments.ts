@@ -11,7 +11,7 @@ type OrderResponse = {
 }
 
 export const createOrder = async(bookingId : string) => {
-    const res = await apiClient.post<ApiResponse<OrderResponse>>(`/bookings/${bookingId}/create-order`);
+    const res = await apiClient.post<ApiResponse<OrderResponse>>(`/payments/bookings/${bookingId}/create-order`);
     return res.data.data;
 }
 
