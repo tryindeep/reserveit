@@ -23,3 +23,36 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 )
+
+// User clicks "View Movies"
+//         │
+//         ▼
+// apiClient.get("/movies")
+//         │
+//         ▼
+// Request Interceptor
+//         │
+//         ├── Read token
+//         ├── Add Authorization header
+//         │
+//         ▼
+// Backend API
+//         │
+//         ├── Token valid
+//         │      │
+//         │      ▼
+//         │   Return movies (200)
+//         │
+//         └── Token invalid
+//                │
+//                ▼
+//           Return 401
+//                │
+//                ▼
+// Response Interceptor
+//                │
+//       Remove token & user
+//                │
+//       Redirect to /login
+//                │
+//       Reject Promise
