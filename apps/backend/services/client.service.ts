@@ -1,6 +1,15 @@
 import { db } from "@repo/db";
 
 export const ClientService = {
+  getClientByUserId: async (userId: string) => db.client.findUnique({
+    where: { userId },
+    include: { user: { select: { id: true, email: true, name: true, phone: true } } },
+  }),
+  getTheatersByUserId: async (userId: string) => {
+    const client = await db.client.findUnique({ where: { userId }, select: { id: true } });
+    if (!client) return [];
+    return db.theater.findMany({ where: { clientId: client.id }, include: { screens: true }, orderBy: { createdAt: "desc" } });
+  },
   // List clients awaiting approval
   getPendingClients: async () => {
     return db.client.findMany({

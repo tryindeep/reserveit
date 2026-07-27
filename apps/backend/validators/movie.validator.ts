@@ -5,6 +5,8 @@ export const createMovieSchema = z.object({
   description: z.string().min(1),
   casts: z.array(z.string()).min(1),
   trailerUrl: z.url(),
+  posterUrl: z.url().optional(),
+  backdropUrl: z.url().optional(),
   language: z.string().default("English"),
   releaseDate: z.coerce.date(),
   director: z.string().min(1),

@@ -30,7 +30,10 @@ export const BookingService = {
         } 
 
         const alreadyTaken = showtimeSeats.filter((s) => s.status !== "AVAILABLE");
-        if (alreadyTaken.length > 0) return { error: "SEAT_ALREADY_TAKEN" as const };
+        if (alreadyTaken.length > 0) {
+            await redis.del(...acquiredKeys);
+            return { error: "SEAT_ALREADY_TAKEN" as const };
+        }
 
         const now = new Date();
         const expiresAt = new Date(now.getTime() + HOLD_DURATION_MS);

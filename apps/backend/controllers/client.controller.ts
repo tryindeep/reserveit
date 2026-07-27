@@ -9,9 +9,20 @@ type ClientControllerType = {
   getPendingClients: RequestHandler;
   getClientById: RequestHandler;
   updateClientStatus: RequestHandler;
+  getMyClient: RequestHandler;
+  getMyTheaters: RequestHandler;
 };
 
 export const ClientController: ClientControllerType = {
+  getMyClient: asyncHandler(async (req, res) => {
+    const client = await ClientService.getClientByUserId(req.user!.userId);
+    if (!client) return sendError(res, 404, "Client profile not found");
+    return sendSuccess(res, 200, client);
+  }),
+  getMyTheaters: asyncHandler(async (req, res) => {
+    const theaters = await ClientService.getTheatersByUserId(req.user!.userId);
+    return sendSuccess(res, 200, theaters);
+  }),
   getPendingClients: asyncHandler(async (req, res) => {
     const clients = await ClientService.getPendingClients();
     return sendSuccess(res, 200, clients);

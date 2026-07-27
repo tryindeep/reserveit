@@ -31,6 +31,9 @@ import { bookingRouter } from "./routes/booking.routes";
 import { BookingService } from "./services/booking.service";
 import { clientRouter } from "./routes/client.routes";
 import { paymentRouter } from "./routes/payment.routes";
+import { authRouter } from "./routes/auth.routes";
+
+app.use("/api/v1/auth", authRouter);
 
 //versions of routes \\
 //movie
