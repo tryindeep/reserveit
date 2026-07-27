@@ -1,35 +1,4 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom";
-import { login as loginApi  } from "../api/auth";
-import { useAuthStore } from "../store/authStore";
-
-export  default function LoginPage(){
-    const [email , setEmail] = useState("");
-    const [password,setPassword] = useState("");
-    const [error , setError] = useState("");
-    const navigate = useNavigate();;
-    const login = useAuthStore((state) => state.login);
-    
-    const handleSubmit = async(e : React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-        try {
-            const result = await loginApi(email, password);
-            login(result.user, result.token);
-            navigate("/movies");
-        } catch (error : any) {
-            setError(error.response?.data.message ?? "Login Failed")
-        }
-    }
-
-    return (
-       <>
-         <form action="" onSubmit={handleSubmit}>
-            <h1>login</h1>
-            <input type="email" placeholder="example@email.com" value={email} onChange={(e)=> setEmail(e.target.value)} required/>
-            <input type="password" placeholder="Password"  onChange={(e)=> setPassword(e.target.value)} required/>
-            <button type="submit">Submit</button>
-         </form>
-       </>
-    )
-}
+import { useState } from "react"; import { useNavigate } from "react-router-dom"; import { login as loginApi } from "../api/auth"; import { useAuthStore } from "../store/authStore";
+export default function LoginPage() { const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false); const navigate = useNavigate(); const login = useAuthStore(s => s.login);
+ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault(); setError(""); setLoading(true); try { const result = await loginApi(email, password); login(result.user, result.token); navigate("/movies"); } catch (err: any) { setError(err.response?.data?.message ?? "We couldn’t sign you in. Check your details and try again."); setLoading(false); } };
+ return <main className="auth-page"><section className="auth-card"><div className="auth-intro"><div className="brand"><span className="brand-mark">R</span>reservit</div><p>Film nights deserve a little ceremony. Find your seat, skip the queue, and settle in.</p><div className="auth-quote">“A ticket to somewhere else, for a little while.”</div></div><form className="auth-form" onSubmit={handleSubmit}><span className="eyebrow">Welcome back</span><h1>Your next story awaits.</h1><p>Sign in to discover films and reserve your perfect seat.</p>{error && <div className="error">{error}</div>}<label className="field">EMAIL ADDRESS<input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required /></label><label className="field">PASSWORD<input type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} required /></label><button className="btn" type="submit" disabled={loading}>{loading ? "Signing you in…" : "Continue to Reservit →"}</button><p className="auth-foot">New here? <span>Ask your theatre for an invitation.</span></p></form></section></main>; }
