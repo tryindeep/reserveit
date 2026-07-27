@@ -88,6 +88,8 @@ model Movie {
   casts         String[]
   director      String
   trailerUrl    String
+  posterUrl     String?
+  backdropUrl   String?
   language      String        @default("English")
   releaseDate   DateTime
   releaseStatus ReleaseStatus @default(RELEASED)
