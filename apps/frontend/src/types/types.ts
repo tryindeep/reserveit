@@ -12,6 +12,10 @@ export type Movie = {
     casts: string[];
     director: string;
     trailerUrl : string;
+    posterUrl?: string | null;
+    backdropUrl?: string | null;
+    language?: string;
+    releaseStatus?: "RELEASED" | "UPCOMING" | "CANCELLED";
     releaseDate: string;
     durationMins : number | null;
 };

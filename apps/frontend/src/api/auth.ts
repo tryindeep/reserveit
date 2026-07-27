@@ -13,3 +13,8 @@ export const register = async (data : {email : string, password: string, name : 
     const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register" ,data);
     return  res.data.data;
 }
+
+export const registerClient = async (data: { email: string; password: string; name: string; phone: string; businessName: string }) => {
+    const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register/client", data);
+    return res.data.data;
+};
