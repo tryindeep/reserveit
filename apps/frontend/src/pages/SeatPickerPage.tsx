@@ -25,7 +25,7 @@ export default function SeatPickerPage(){
     if(!showtimeId || selected.length === 0) return;
     setError("");
     try {
-      // holdSeats expects a single seat id (string) — pass the first selected seat
+      // holdSeats correctly takes the full selected array (matches your backend's seatIds: string[]
       const booking = await holdSeats(showtimeId, selected);
       navigate(`/bookings/${booking.id}`)
     } catch (error : any) {

@@ -1,22 +1,22 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { login as loginApi  } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
+import { useAuthStore } from "../store/authStore";
 
 export  default function LoginPage(){
     const [email , setEmail] = useState("");
     const [password,setPassword] = useState("");
     const [error , setError] = useState("");
-    const {login} = useAuth();
     const navigate = useNavigate();;
-
+    const login = useAuthStore((state) => state.login);
+    
     const handleSubmit = async(e : React.FormEvent) => {
         e.preventDefault();
         setError("");
         try {
             const result = await loginApi(email, password);
             login(result.user, result.token);
-            navigate("/movies")
+            navigate("/movies");
         } catch (error : any) {
             setError(error.response?.data.message ?? "Login Failed")
         }
