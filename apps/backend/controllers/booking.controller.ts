@@ -10,10 +10,14 @@ type BookingControllerType = {
     confirmBooking : RequestHandler
     cancelBooking : RequestHandler
     getBookingById : RequestHandler
+    getMyBookings : RequestHandler
 
 }
 
 export const BookingController : BookingControllerType = {
+    getMyBookings: asyncHandler(async (req, res) => {
+        return sendSuccess(res, 200, await BookingService.getBookingsByUser(req.user!.userId));
+    }),
     holdSeats: asyncHandler(async (req, res) => {
         const parsed = holdBookingSchema.safeParse(req.body);
         if (!parsed.success) return sendError(res, 400, parsed.error.message);

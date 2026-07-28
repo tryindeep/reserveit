@@ -5,6 +5,16 @@ const HOLD_DURATION_SECONDS = 300;
 const HOLD_DURATION_MS = HOLD_DURATION_SECONDS * 1000;
 
 export const BookingService = {
+    getBookingsByUser: async (userId: string) => {
+        return db.booking.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            include: {
+                bookingSeats: { include: { seat: true } },
+                showtime: { include: { movie: true, screen: { include: { theater: true } } } },
+            },
+        });
+    },
      holdSeats: async (userId: string, showtimeId: string, seatIds: string[]) => {
         const showtime = await db.showtime.findUnique({ where: { id: showtimeId } });
         if (!showtime) return { error: "SHOWTIME_NOT_FOUND" as const };

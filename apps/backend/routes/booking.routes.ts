@@ -7,6 +7,7 @@ export const bookingRouter =  Router();
 
 bookingRouter.use(authenticate)
 
+bookingRouter.get("/me", BookingController.getMyBookings);
 bookingRouter.post("/hold" ,rateLimiter(5,60), BookingController.holdSeats);
 bookingRouter.post("/:id/confirm" , BookingController.confirmBooking);
 bookingRouter.post("/:id/cancel" , BookingController.cancelBooking);;
