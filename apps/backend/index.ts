@@ -1,33 +1,40 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser"
+import bodyParser from "body-parser";
 import { db } from "@repo/db";
 import { errorHandler } from "./utils/errorHandler";
 const app = express();
-
-
-
 
 // Webhook router FIRST — needs raw body, must run before bodyParser.json()
 import { webhookRouter } from "./routes/webhook.routes";
 app.use("/api/v1/webhooks", webhookRouter);
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter((origin): origin is string => Boolean(origin));
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // configuring a body parser
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}))
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routers
-import { movieRouter } from "./routes/movie.routes"
+import { movieRouter } from "./routes/movie.routes";
 import { theaterRouter } from "./routes/theater.routes";
 import { theaterMovieRouter } from "./routes/theaterMovie.routes";
 import { screenRouter } from "./routes/screen.routes";
 import { showtimeRouter } from "./routes/showtime.routes";
 import { seatRouter } from "./routes/seat.routes";
 import { bookingRouter } from "./routes/booking.routes";
-//service 
+//service
 import { BookingService } from "./services/booking.service";
 import { clientRouter } from "./routes/client.routes";
 import { paymentRouter } from "./routes/payment.routes";
@@ -37,7 +44,7 @@ app.use("/api/v1/auth", authRouter);
 
 //versions of routes \\
 //movie
-app.use("/api/v1/movies" , movieRouter);
+app.use("/api/v1/movies", movieRouter);
 
 //theater
 app.use("/api/v1/theaters", theaterRouter);
@@ -46,18 +53,18 @@ app.use("/api/v1/theaters", theaterRouter);
 app.use("/api/v1/theaters", theaterMovieRouter);
 
 //Screen
-app.use("/api/v1/" , screenRouter);
+app.use("/api/v1/", screenRouter);
 
 //ShowTime
-app.use("/api/v1/" , showtimeRouter);
+app.use("/api/v1/", showtimeRouter);
 
-// seat 
-app.use("/api/v1" , seatRouter);
+// seat
+app.use("/api/v1", seatRouter);
 
 // bookings
-app.use("/api/v1/bookings" , bookingRouter);
+app.use("/api/v1/bookings", bookingRouter);
 
-//client 
+//client
 app.use("/api/v1/clients", clientRouter);
 
 //payment
@@ -67,7 +74,7 @@ app.use("/api/v1/payments", paymentRouter);
 setInterval(async () => {
   try {
     const count = await BookingService.expireStaleBookings();
-    if(count > 0) console.log(`Expired ${count} stale booking(s)`);
+    if (count > 0) console.log(`Expired ${count} stale booking(s)`);
   } catch (error) {
     console.error("Error while expiring stale bookings:", error);
   }
@@ -78,14 +85,14 @@ app.use(errorHandler);
 
 // linking with Database
 async function main() {
-    await db.$connect(); // fails fast if neon/pool is unreachable
-    app.listen(process.env.PORT,() => {
-        console.log(`Sever started on port ${process.env.PORT} !!`)
-    });
+  await db.$connect(); // fails fast if neon/pool is unreachable
+  app.listen(process.env.PORT, () => {
+    console.log(`Sever started on port ${process.env.PORT} !!`);
+  });
 }
 main().catch((e) => {
-    console.error(e);
-    process.exit(1);
+  console.error(e);
+  process.exit(1);
 });
 
 // graceful shutdown
