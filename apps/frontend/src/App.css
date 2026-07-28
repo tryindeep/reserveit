@@ -399,6 +399,12 @@
     500 11px "DM Mono",
     monospace;
 }
+.theatre-showtimes { display: grid; gap: 20px; }
+.theatre-showtime-group { border-top: 1px solid var(--line); padding-top: 16px; }
+.theatre-showtime-heading { margin-bottom: 12px; }
+.theatre-showtime-heading b { display: block; font-size: 15px; }
+.theatre-showtime-heading span, .time small { color: var(--muted); font-size: 11px; }
+.time small { display: block; margin-top: 5px; }
 
 .booking-layout {
   display: grid;

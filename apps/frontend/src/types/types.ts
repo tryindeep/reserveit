@@ -27,6 +27,10 @@ export type Showtime = {
   startTime : string;
   endTime  : string;
   price : number;
+  screen?: {
+    name: string;
+    theater: { name: string; city: string; address: string };
+  };
 };
 
 export type ShowtimeSeat = {
