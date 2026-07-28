@@ -10,11 +10,13 @@ type Theater = {
   address: string;
   screens: { id: string; name: string; totalSeats: number; screenType: string }[];
 };
+type Movie = { id: string; name: string };
 export default function ClientDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const [profile, setProfile] = useState<any>(null);
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [message, setMessage] = useState("");
+  const [theaterMovies, setTheaterMovies] = useState<Movie[]>([]);
   const [screenForm, setScreenForm] = useState({
     theaterId: "",
     name: "Screen 1",
@@ -29,6 +31,13 @@ export default function ClientDashboardPage() {
     description: "",
     totalScreens: "1",
   });
+  const [showtimeForm, setShowtimeForm] = useState({
+    theaterId: "",
+    screenId: "",
+    movieId: "",
+    startTime: "",
+    price: "250",
+  });
   const load = () =>
     Promise.all([
       apiClient.get("/clients/me"),
@@ -40,6 +49,11 @@ export default function ClientDashboardPage() {
         if (!screenForm.theaterId && t.data.data.length) {
           setScreenForm((current) => ({ ...current, theaterId: t.data.data[0].id }));
         }
+        setShowtimeForm((current) => ({
+          ...current,
+          theaterId: current.theaterId || t.data.data[0]?.id || "",
+          screenId: current.screenId || t.data.data[0]?.screens[0]?.id || "",
+        }));
       })
       .catch((e) =>
         setMessage(
@@ -49,6 +63,19 @@ export default function ClientDashboardPage() {
   useEffect(() => {
     if (user?.role === "CLIENT") load();
   }, [user?.role]);
+  useEffect(() => {
+    if (!showtimeForm.theaterId) {
+      setTheaterMovies([]);
+      return;
+    }
+    apiClient.get(`/theaters/${showtimeForm.theaterId}/movies`)
+      .then((response) => {
+        const movies = response.data.data as Movie[];
+        setTheaterMovies(movies);
+        setShowtimeForm((current) => ({ ...current, movieId: movies.some((movie) => movie.id === current.movieId) ? current.movieId : movies[0]?.id || "" }));
+      })
+      .catch((err) => setMessage(err.response?.data?.message ?? "Could not load theatre movies."));
+  }, [showtimeForm.theaterId]);
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== "CLIENT") return <Navigate to="/movies" replace />;
   const create = async (e: React.FormEvent) => {
@@ -100,6 +127,23 @@ export default function ClientDashboardPage() {
       setMessage(err.response?.data?.message ?? "Could not create the screen.");
     }
   };
+  const createShowtime = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessage("");
+    try {
+      await apiClient.post("/showtimes", {
+        movieId: showtimeForm.movieId,
+        screenId: showtimeForm.screenId,
+        startTime: new Date(showtimeForm.startTime).toISOString(),
+        price: Number(showtimeForm.price),
+      });
+      setMessage("Showtime published with a seat map and ticket prices.");
+      setShowtimeForm((current) => ({ ...current, startTime: "" }));
+    } catch (err: any) {
+      setMessage(err.response?.data?.message ?? "Could not publish the showtime.");
+    }
+  };
+  const selectedTheater = theaters.find((theater) => theater.id === showtimeForm.theaterId);
   return (
     <div className="app-shell">
       <SiteHeader />
@@ -213,6 +257,40 @@ export default function ClientDashboardPage() {
             </label>
             <p className="screen-layout-note">Layout: {Math.ceil(Number(screenForm.totalSeats || 0) / Number(screenForm.seatsPerRow || 1))} rows, up to {screenForm.seatsPerRow || 0} seats per row.</p>
             <button className="btn" disabled={!theaters.length || profile?.status !== "APPROVED"}>Create screen &amp; seats</button>
+          </form>
+        </section>
+        <section className="dashboard-card screen-setup-card">
+          <span className="eyebrow">Showtime setup</span>
+          <h2>Set a time and ticket price</h2>
+          <p className="muted">Movies must first be assigned by an administrator. Each new showtime creates its bookable seat map automatically.</p>
+          <form className="admin-form screen-form" onSubmit={createShowtime}>
+            <label>
+              Theatre
+              <select value={showtimeForm.theaterId} onChange={(e) => setShowtimeForm({ ...showtimeForm, theaterId: e.target.value, screenId: theaters.find((theater) => theater.id === e.target.value)?.screens[0]?.id || "" })}>
+                {theaters.length ? theaters.map((theater) => <option key={theater.id} value={theater.id}>{theater.name}</option>) : <option value="">Create a theatre first</option>}
+              </select>
+            </label>
+            <label>
+              Screen
+              <select value={showtimeForm.screenId} onChange={(e) => setShowtimeForm({ ...showtimeForm, screenId: e.target.value })}>
+                {selectedTheater?.screens.length ? selectedTheater.screens.map((screen) => <option key={screen.id} value={screen.id}>{screen.name}</option>) : <option value="">Create a screen first</option>}
+              </select>
+            </label>
+            <label>
+              Assigned movie
+              <select value={showtimeForm.movieId} onChange={(e) => setShowtimeForm({ ...showtimeForm, movieId: e.target.value })}>
+                {theaterMovies.length ? theaterMovies.map((movie) => <option key={movie.id} value={movie.id}>{movie.name}</option>) : <option value="">No movies assigned yet</option>}
+              </select>
+            </label>
+            <label>
+              Starts at
+              <input required type="datetime-local" value={showtimeForm.startTime} onChange={(e) => setShowtimeForm({ ...showtimeForm, startTime: e.target.value })} />
+            </label>
+            <label>
+              Base price (₹)
+              <input required type="number" min="1" value={showtimeForm.price} onChange={(e) => setShowtimeForm({ ...showtimeForm, price: e.target.value })} />
+            </label>
+            <button className="btn" disabled={!showtimeForm.screenId || !showtimeForm.movieId || profile?.status !== "APPROVED"}>Publish showtime</button>
           </form>
         </section>
       </main>

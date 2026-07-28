@@ -10,6 +10,7 @@ type Client = {
   user: { name: string; email: string; phone?: string };
   createdAt: string;
 };
+type Theater = { id: string; name: string; city: string };
 const initial = {
   name: "",
   description: "",
@@ -26,13 +27,21 @@ export default function AdminDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [theaters, setTheaters] = useState<Theater[]>([]);
+  const [assignment, setAssignment] = useState({ theaterId: "", movieId: "" });
   const [form, setForm] = useState(initial);
   const [message, setMessage] = useState("");
   const load = () =>
-    Promise.all([apiClient.get("/movies"), apiClient.get("/clients/pending")])
-      .then(([m, c]) => {
+    Promise.all([apiClient.get("/movies"), apiClient.get("/clients/pending"), apiClient.get("/theaters")])
+      .then(([m, c, t]) => {
         setMovies(m.data.data);
         setClients(c.data.data);
+        const venues = t.data.data.theaters as Theater[];
+        setTheaters(venues);
+        setAssignment((current) => ({
+          theaterId: current.theaterId || venues[0]?.id || "",
+          movieId: current.movieId || m.data.data[0]?.id || "",
+        }));
       })
       .catch((e) =>
         setMessage(
@@ -75,6 +84,18 @@ export default function AdminDashboardPage() {
       load();
     } catch (err: any) {
       setMessage(err.response?.data?.message ?? "Could not update partner");
+    }
+  };
+  const assignMovie = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessage("");
+    try {
+      await apiClient.post(`/theaters/${assignment.theaterId}/movies/${assignment.movieId}`);
+      const theater = theaters.find((item) => item.id === assignment.theaterId);
+      const movie = movies.find((item) => item.id === assignment.movieId);
+      setMessage(`${movie?.name ?? "Movie"} is now assigned to ${theater?.name ?? "the theatre"}.`);
+    } catch (err: any) {
+      setMessage(err.response?.data?.message ?? "Could not assign the movie to this theatre.");
     }
   };
   return (
@@ -188,6 +209,26 @@ export default function AdminDashboardPage() {
                 </article>
               ))}
             </div>
+          </section>
+          <section className="dashboard-card">
+            <span className="eyebrow">Theatre programming</span>
+            <h2>Assign a movie</h2>
+            <p className="muted">Choose the theatre where a published film can be scheduled.</p>
+            <form className="admin-form" onSubmit={assignMovie}>
+              <label>
+                Theatre
+                <select required value={assignment.theaterId} onChange={(e) => setAssignment({ ...assignment, theaterId: e.target.value })}>
+                  {theaters.length ? theaters.map((theater) => <option key={theater.id} value={theater.id}>{theater.name} · {theater.city}</option>) : <option value="">No theatres yet</option>}
+                </select>
+              </label>
+              <label>
+                Movie
+                <select required value={assignment.movieId} onChange={(e) => setAssignment({ ...assignment, movieId: e.target.value })}>
+                  {movies.length ? movies.map((movie) => <option key={movie.id} value={movie.id}>{movie.name}</option>) : <option value="">No published movies yet</option>}
+                </select>
+              </label>
+              <button className="btn" disabled={!assignment.theaterId || !assignment.movieId}>Assign movie</button>
+            </form>
           </section>
         </div>
       </main>

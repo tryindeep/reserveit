@@ -5,6 +5,7 @@ import { sendError } from "./responseBody";
 const ERROR_MAP: Record<string, [number, string]> = {
   THEATER_NOT_FOUND: [404, "Theater not found"],
   MOVIE_NOT_FOUND: [404, "Movie not found"],
+  MOVIE_NOT_ASSIGNED_TO_THEATER: [400, "Assign this movie to the theatre before creating a showtime"],
   SCREEN_NOT_FOUND: [404, "Screen not found"],
   SHOWTIME_NOT_FOUND: [404, "Showtime not found"],
   SEAT_NOT_FOUND: [404, "Seat not found"],

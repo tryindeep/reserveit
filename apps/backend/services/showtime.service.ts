@@ -1,7 +1,11 @@
 import { db } from "@repo/db"
-import { date } from "zod";
-
 const DEFAULT_DURATION_MINS = 150;
+const SEAT_TYPE_MULTIPLIER: Record<string, number> = {
+    STANDARD: 1,
+    PREMIUM: 1.2,
+    RECLINER: 1.5,
+    VIP: 1.75,
+};
 
 export const ShowtimeService = {
 
@@ -18,6 +22,11 @@ export const ShowtimeService = {
         const movie = await db.movie.findUnique({where : { id: data.movieId }});
         if(!movie) return { error: "MOVIE_NOT_FOUND" as const };
 
+        const isAssignedToTheater = await db.theaterMovie.findUnique({
+            where: { theaterId_movieId: { theaterId: screen.theaterId, movieId: data.movieId } },
+        });
+        if (!isAssignedToTheater) return { error: "MOVIE_NOT_ASSIGNED_TO_THEATER" as const };
+
         const durationMins = movie.durationMins ?? DEFAULT_DURATION_MINS;
         const endTime = new Date(data.startTime.getTime() + durationMins * 60_000);
 
@@ -30,8 +39,20 @@ export const ShowtimeService = {
         });
         if(overlapping) return { error: "OVERLAP" as const };
         
-        const created = await db.showtime.create({
-            data : { movieId : data.movieId , screenId : data.screenId , startTime : data.startTime, endTime, price: data.price},
+        const created = await db.$transaction(async (tx) => {
+            const showtime = await tx.showtime.create({
+                data : { movieId : data.movieId , screenId : data.screenId , startTime : data.startTime, endTime, price: data.price},
+            });
+            const seats = await tx.seat.findMany({ where: { screenId: data.screenId } });
+            if (seats.length === 0) throw new Error("SCREEN_HAS_NO_SEATS");
+            await tx.showtimeSeat.createMany({
+                data: seats.map((seat) => ({
+                    showtimeId: showtime.id,
+                    seatId: seat.id,
+                    price: roundPrice(data.price * (SEAT_TYPE_MULTIPLIER[seat.seatType] ?? 1)),
+                })),
+            });
+            return showtime;
         });
         return {data : created}
     },
@@ -52,6 +73,9 @@ export const ShowtimeService = {
     },
     // add to showtime.service.ts
     getShowtimeSeats: async (showtimeId: string) => {
+        // Backfill inventories for showtimes created before seat maps were generated.
+        const existing = await db.showtimeSeat.count({ where: { showtimeId } });
+        if (existing === 0) await createSeatInventory(showtimeId);
         return db.showtimeSeat.findMany({
             where: { showtimeId },
             include: { seat: true },
@@ -89,4 +113,23 @@ export const ShowtimeService = {
         return { data: await db.showtime.delete({ where: { id } }) };
     },
 
+}
+
+const roundPrice = (price: number) => Math.round(price * 100) / 100;
+
+async function createSeatInventory(showtimeId: string) {
+    await db.$transaction(async (tx) => {
+        const showtime = await tx.showtime.findUnique({ where: { id: showtimeId } });
+        if (!showtime) return;
+        const seats = await tx.seat.findMany({ where: { screenId: showtime.screenId } });
+        if (seats.length === 0) return;
+        await tx.showtimeSeat.createMany({
+            data: seats.map((seat) => ({
+                showtimeId,
+                seatId: seat.id,
+                price: roundPrice(showtime.price * (SEAT_TYPE_MULTIPLIER[seat.seatType] ?? 1)),
+            })),
+            skipDuplicates: true,
+        });
+    });
 }

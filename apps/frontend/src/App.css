@@ -493,6 +493,22 @@
   background: #1b1d1d;
   border-color: #282b29;
 }
+.seat-prices {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.seat-prices span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.seat-prices b { color: var(--text); }
 .summary-card {
   background: #1b1d1e;
   padding: 22px;
@@ -726,7 +742,8 @@
   text-transform: uppercase;
 }
 .admin-form input,
-.admin-form textarea {
+.admin-form textarea,
+.admin-form select {
   background: #242724;
   border: 1px solid #41433f;
   border-radius: 7px;
@@ -1511,17 +1528,20 @@ body {
   color: #99a0ad;
 }
 .admin-form input:hover,
-.admin-form textarea:hover {
+.admin-form textarea:hover,
+.admin-form select:hover {
   border-color: rgba(184, 245, 90, 0.42);
 }
 .admin-form input:focus,
-.admin-form textarea:focus {
+.admin-form textarea:focus,
+.admin-form select:focus {
   border-color: var(--accent);
   background: #2d323e;
   box-shadow: 0 0 0 4px rgba(184, 245, 90, 0.15);
 }
 :root[data-theme="light"] .admin-form input,
-:root[data-theme="light"] .admin-form textarea {
+:root[data-theme="light"] .admin-form textarea,
+:root[data-theme="light"] .admin-form select {
   background: #f7f8f5;
   border-color: #d9ddd3;
   color: #20231f;

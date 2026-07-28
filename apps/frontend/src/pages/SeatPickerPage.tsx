@@ -10,16 +10,28 @@ export default function SeatPickerPage() {
   const [seats, setSeats] = useState<ShowtimeSeat[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [holding, setHolding] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
-    if (showtimeId) getShowtimeSeats(showtimeId).then(setSeats);
+    if (!showtimeId) return;
+    setLoading(true);
+    setError("");
+    getShowtimeSeats(showtimeId)
+      .then(setSeats)
+      .catch((err) => setError(err.response?.data?.message ?? "Could not load this seat map."))
+      .finally(() => setLoading(false));
   }, [showtimeId]);
   const selectedSeats = useMemo(
     () => seats.filter((s) => selected.includes(s.seatId)),
     [seats, selected],
   );
   const total = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+  const priceBySeatType = useMemo(() => {
+    const prices = new Map<string, number>();
+    seats.forEach((seat) => prices.set(seat.seat.seatType, seat.price));
+    return [...prices.entries()];
+  }, [seats]);
   const toggleSeat = (id: string) =>
     setSelected((prev) =>
       prev.includes(id)
@@ -55,11 +67,8 @@ export default function SeatPickerPage() {
         <div className="booking-layout">
           <section>
             <div className="screen">SCREEN THIS WAY</div>
-            <SeatGrid
-              seats={seats}
-              selectedSeatIds={selected}
-              onToggle={toggleSeat}
-            />
+            {loading ? <p className="muted">Loading available seats…</p> : <SeatGrid seats={seats} selectedSeatIds={selected} onToggle={toggleSeat} />}
+            {!loading && !seats.length && !error && <p className="muted">No seats have been configured for this showtime yet.</p>}
             <div className="legend">
               <span>
                 <i />
@@ -74,6 +83,11 @@ export default function SeatPickerPage() {
                 Unavailable
               </span>
             </div>
+            {!!priceBySeatType.length && (
+              <div className="seat-prices" aria-label="Seat prices">
+                {priceBySeatType.map(([type, price]) => <span key={type}>{type.replace("_", " ")}: <b>₹{price.toLocaleString("en-IN")}</b></span>)}
+              </div>
+            )}
           </section>
           <aside className="summary-card">
             <h3>Your selection</h3>
