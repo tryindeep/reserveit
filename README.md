@@ -59,6 +59,7 @@ reservit-system-design.md  System-design notes
 
    ```dotenv
    PORT=3000
+   FRONTEND_URL=http://localhost:5173
    DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/reserveit?schema=public"
    REDIS_URL="redis://localhost:6379"
    JWT_SECRET="replace-with-a-long-random-secret"
@@ -113,6 +114,95 @@ Run these from the repository root:
 | `bun run lint`        | Run workspace lint tasks                                 |
 | `bun run check-types` | Run workspace type-check tasks                           |
 | `bun run format`      | Format TypeScript, TSX, and Markdown files with Prettier |
+
+## Deployment
+
+The recommended production setup is Vercel for the frontend, Render for the API, a managed PostgreSQL database, and managed Redis.
+
+### 1. Provision managed services
+
+Create a production PostgreSQL database (for example, Neon or Render Postgres) and a Redis database (for example, Upstash or Redis Cloud). Keep their connection URLs ready; they become `DATABASE_URL` and `REDIS_URL` in the API service.
+
+### 2. Deploy the API to Render
+
+1. In Render, create **New > Web Service** and connect this repository.
+2. Use the repository root as the service root directory.
+3. Set the build command:
+
+   ```bash
+   bun install --frozen-lockfile && bun run --cwd packages/db generate && bun run --cwd packages/db migrate:deploy
+   ```
+
+4. Set the start command:
+
+   ```bash
+   bun run --cwd apps/backend start
+   ```
+
+5. Add these environment variables in Render. Do not add a production `PORT`; Render supplies it automatically.
+
+   ```dotenv
+   DATABASE_URL=your-production-postgres-url
+   REDIS_URL=your-production-redis-url
+   JWT_SECRET=a-long-random-production-secret
+   RAZORPAY_KEY_ID=rzp_live_or_test_key
+   RAZORPAY_KEY_SECRET=razorpay-key-secret
+   RAZORPAY_WEBHOOK_SECRET=dedicated-webhook-secret
+   NODE_ENV=production
+   ```
+
+6. Deploy. Once successful, Render displays a URL such as `https://reserveit-api.onrender.com` on the service's overview page. Copy it and verify the API with:
+
+   ```text
+   https://reserveit-api.onrender.com/api/v1/movies
+   ```
+
+   A JSON response (including an empty list) proves that the API URL works. A browser `Cannot GET /` response at the bare API domain is expected because this app has no root route.
+
+### 3. Deploy the frontend to Vercel
+
+1. In Vercel, import the repository and set **Root Directory** to `apps/frontend`.
+2. Vercel detects Vite. Use `bun run build` as the build command and `dist` as the output directory if it does not prefill them.
+3. Add this environment variable:
+
+   ```dotenv
+   VITE_API_BASE_URL=https://reserveit-api.onrender.com/api/v1
+   ```
+
+   Replace the hostname with the Render URL from the previous step. Variables beginning with `VITE_` are included in the browser build, so never store secrets in them.
+
+4. Deploy. Vercel shows the public URL in the deployment summary, for example `https://reserveit.vercel.app`. Open it in a browser and copy it.
+
+The included `apps/frontend/vercel.json` rewrites all routes to `index.html`, so direct links such as `/movies/:movieId` continue to work after deployment.
+
+### 4. Connect the services
+
+1. In Render, set `FRONTEND_URL` to the Vercel URL, with no trailing slash:
+
+   ```dotenv
+   FRONTEND_URL=https://reserveit.vercel.app
+   ```
+
+2. Redeploy the Render service after saving that variable.
+3. In Razorpay Dashboard, create a webhook for:
+
+   ```text
+   https://reserveit-api.onrender.com/api/v1/webhooks/razorpay
+   ```
+
+   Subscribe to `payment.captured` and set its secret to the same value used for `RAZORPAY_WEBHOOK_SECRET`.
+
+### Deployment URL checklist
+
+| Check                             | Expected result                                       |
+| --------------------------------- | ----------------------------------------------------- |
+| Render API URL + `/api/v1/movies` | JSON response, not a browser error page               |
+| Vercel URL                        | ReserveIt movie page loads                            |
+| Browser DevTools > Network        | API requests go to the Render domain, not `localhost` |
+| Login or registration             | No CORS error in the browser console                  |
+| Razorpay webhook dashboard        | Test delivery returns HTTP 200                        |
+
+When using a custom domain, update `VITE_API_BASE_URL` only if the API domain changes, update `FRONTEND_URL` to the new frontend domain, then redeploy the affected service.
 
 ## Reservation lifecycle
 

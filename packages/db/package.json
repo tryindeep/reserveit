@@ -6,6 +6,10 @@
   "prisma": {
     "seed": "bun run prisma/seed.ts"
   },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy"
+  },
   "module": "index.ts",
   "type": "module",
   "private": true,
