@@ -1,9 +1,31 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap");
 
-:root { font-family: "Manrope", sans-serif; color: #f9f7f2; background: #111315; font-synthesis: none; }
-* { box-sizing: border-box; }
-html { min-width: 320px; background: #111315; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
-button, input { font: inherit; }
-button { border: 0; }
-a { color: inherit; text-decoration: none; }
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #f7f7fb;
+  background: #101117;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  min-width: 320px;
+  background: #101117;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  border: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}

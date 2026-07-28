@@ -4,14 +4,136 @@ import type { Booking } from "../types/types";
 import { getBookingById } from "../api/bookings";
 import { createOrder, verifyPayment } from "../api/payments";
 import { SiteHeader } from "../components/SiteHeader";
-declare global { interface Window { Razorpay: any; } }
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function BookingConfirmationPage() {
-  const { bookingId } = useParams<{ bookingId: string }>(); const [booking, setBooking] = useState<Booking | null>(null); const [paying, setPaying] = useState(false); const [error, setError] = useState("");
-  const refreshBooking = () => { if (bookingId) getBookingById(bookingId).then(setBooking); };
-  useEffect(() => { refreshBooking(); }, [bookingId]);
-  const handlePay = async () => { if (!bookingId) return; setError(""); setPaying(true); try { const order = await createOrder(bookingId); if (!order) throw new Error("Could not create order"); const rzp = new window.Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency, name: "Reservit", description: "Movie ticket booking", handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => { try { await verifyPayment(response); let attempts = 0; const poll = setInterval(async () => { attempts += 1; const updated = await getBookingById(bookingId); if (updated) setBooking(updated); if (updated?.status !== "PENDING" || attempts >= 5) clearInterval(poll); }, 1500); } catch (err: any) { setError(err.response?.data?.message ?? "Payment verification failed"); } finally { setPaying(false); } }, modal: { ondismiss: () => setPaying(false) } }); rzp.open(); } catch (err: any) { setError(err.response?.data?.message ?? "Failed to start payment"); setPaying(false); } };
-  if (!booking) return <div className="app-shell"><SiteHeader /><div className="loading">Preparing your booking…</div></div>;
+  const { bookingId } = useParams<{ bookingId: string }>();
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [error, setError] = useState("");
+  const refreshBooking = () => {
+    if (bookingId) getBookingById(bookingId).then(setBooking);
+  };
+  useEffect(() => {
+    refreshBooking();
+  }, [bookingId]);
+  const handlePay = async () => {
+    if (!bookingId) return;
+    setError("");
+    setPaying(true);
+    try {
+      const order = await createOrder(bookingId);
+      if (!order) throw new Error("Could not create order");
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        order_id: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Reservit",
+        description: "Movie ticket booking",
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            await verifyPayment(response);
+            let attempts = 0;
+            const poll = setInterval(async () => {
+              attempts += 1;
+              const updated = await getBookingById(bookingId);
+              if (updated) setBooking(updated);
+              if (updated?.status !== "PENDING" || attempts >= 5)
+                clearInterval(poll);
+            }, 1500);
+          } catch (err: any) {
+            setError(
+              err.response?.data?.message ?? "Payment verification failed",
+            );
+          } finally {
+            setPaying(false);
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+      rzp.open();
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? "Failed to start payment");
+      setPaying(false);
+    }
+  };
+  if (!booking)
+    return (
+      <div className="app-shell">
+        <SiteHeader />
+        <div className="loading">Preparing your booking…</div>
+      </div>
+    );
   const pending = booking.status === "PENDING";
-  return <div className="app-shell"><SiteHeader /><main className="page"><section className="confirmation"><div className="confirmation-icon">{pending ? "◷" : booking.status === "CONFIRMED" ? "✓" : "!"}</div><span className="eyebrow">{pending ? "Almost there" : "Booking status"}</span><h1 className="title">{pending ? "Your seats are held." : booking.status === "CONFIRMED" ? "You’re going to the movies!" : `Booking ${booking.status.toLowerCase()}.`}</h1><p className="subtitle">{pending ? "Complete payment before the hold expires and your seats are all yours." : "Keep this confirmation handy for your visit to the theatre."}</p><div className="confirmation-card"><div className="booking-id"><span>BOOKING REFERENCE</span><b>#{booking.id.slice(-8).toUpperCase()}</b></div><div className="summary-line"><span>Status</span><b>{booking.status}</b></div>{pending && <div className="summary-line"><span>Hold expires</span><b>{new Date(booking.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</b></div>}<div className="summary-total"><span>Total</span><b>₹{booking.totalAmount.toLocaleString("en-IN")}</b></div>{error && <p className="error">{error}</p>}{pending ? <button className="btn" onClick={handlePay} disabled={paying}>{paying ? "Opening secure payment…" : "Pay securely now →"}</button> : <Link className="btn" to="/movies">Browse more films</Link>}</div></section></main></div>;
+  return (
+    <div className="app-shell">
+      <SiteHeader />
+      <main className="page">
+        <section className="confirmation">
+          <div className="confirmation-icon">
+            {pending ? "◷" : booking.status === "CONFIRMED" ? "✓" : "!"}
+          </div>
+          <span className="eyebrow">
+            {pending ? "Almost there" : "Booking status"}
+          </span>
+          <h1 className="title">
+            {pending
+              ? "Your seats are held."
+              : booking.status === "CONFIRMED"
+                ? "You’re going to the movies!"
+                : `Booking ${booking.status.toLowerCase()}.`}
+          </h1>
+          <p className="subtitle">
+            {pending
+              ? "Complete payment before the hold expires and your seats are all yours."
+              : "Keep this confirmation handy for your visit to the theatre."}
+          </p>
+          <div className="confirmation-card">
+            <div className="booking-id">
+              <span>BOOKING REFERENCE</span>
+              <b>#{booking.id.slice(-8).toUpperCase()}</b>
+            </div>
+            <div className="summary-line">
+              <span>Status</span>
+              <b>{booking.status}</b>
+            </div>
+            {pending && (
+              <div className="summary-line">
+                <span>Hold expires</span>
+                <b>
+                  {new Date(booking.expiresAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </b>
+              </div>
+            )}
+            <div className="summary-total">
+              <span>Total</span>
+              <b>₹{booking.totalAmount.toLocaleString("en-IN")}</b>
+            </div>
+            {error && <p className="error">{error}</p>}
+            {pending ? (
+              <button className="btn" onClick={handlePay} disabled={paying}>
+                {paying ? "Opening secure payment…" : "Pay securely now →"}
+              </button>
+            ) : (
+              <Link className="btn" to="/movies">
+                Browse more films
+              </Link>
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
 }
