@@ -5,6 +5,7 @@ type User = {
     id: string;
     email : string;
     name: string;
+    phone?: string | null;
     role : "SYSTEM_ADMIN"  | "CLIENT" | "CUSTOMER";
 };
 

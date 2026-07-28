@@ -13,6 +13,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const updatePhone = (value: string) => setPhone(
+    value.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "").slice(0, 15),
+  );
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -29,7 +32,7 @@ export default function LoginPage() {
                 phone,
                 businessName,
               })
-            : await register({ email, password, name });
+            : await register({ email, password, name, phone });
       login(result.user, result.token);
       navigate(
         result.user.role === "SYSTEM_ADMIN"
@@ -117,21 +120,25 @@ export default function LoginPage() {
               />
             </label>
           )}
-          {mode === "partner" && (
+          {mode !== "login" && (
             <>
-              <label className="field">
+              {mode === "partner" && <label className="field">
                 CINEMA / BUSINESS NAME
                 <input
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   required
                 />
-              </label>
+              </label>}
               <label className="field">
                 PHONE NUMBER
                 <input
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="\+?[1-9][0-9]{7,14}"
+                  placeholder="9876543210 or +919876543210"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => updatePhone(e.target.value)}
                   required
                 />
               </label>

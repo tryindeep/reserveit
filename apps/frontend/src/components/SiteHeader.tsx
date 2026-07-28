@@ -21,12 +21,6 @@ export function SiteHeader() {
       .slice(0, 2)
       .toUpperCase() || "R";
 
-  const dashboard =
-    user?.role === "SYSTEM_ADMIN"
-      ? "/admin"
-      : user?.role === "CLIENT"
-        ? "/partner"
-        : "/account";
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
@@ -54,7 +48,7 @@ export function SiteHeader() {
         </button>
       {user ? (
         <div className="account-actions">
-          <Link className="profile" to={dashboard} title="Open dashboard">
+          <Link className="profile" to="/account" title="Open profile">
             <span>Hi, {user.name.split(" ")[0]}</span>
             <i className="avatar">{initials}</i>
           </Link>

@@ -8,6 +8,7 @@ import SeatPickerPage from "./pages/SeatPickerPage";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import ClientDashboardPage from "./pages/ClientDashboardPage";
+import AccountPage from "./pages/AccountPage";
 
 function App() {
   return <BrowserRouter><Routes>
@@ -19,6 +20,7 @@ function App() {
     <Route path="/bookings/:bookingId" element={<ProtectedRoute><BookingConfirmationPage /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
     <Route path="/partner" element={<ProtectedRoute><ClientDashboardPage /></ProtectedRoute>} />
+    <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
   </Routes></BrowserRouter>;
 }
 export default App;

@@ -9,7 +9,7 @@ export const login = async( email : string , password : string) => {
     return res.data.data;
 }   
 
-export const register = async (data : {email : string, password: string, name : string }) => {
+export const register = async (data : {email : string, password: string, name : string, phone: string }) => {
     const res = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register" ,data);
     return  res.data.data;
 }
