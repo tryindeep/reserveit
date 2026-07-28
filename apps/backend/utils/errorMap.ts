@@ -16,6 +16,7 @@ const ERROR_MAP: Record<string, [number, string]> = {
   ALREADY_EXISTS: [409, "This resource already exists"],
   OVERLAP: [409, "This screen already has a showtime overlapping this time range"],
   SEATS_ALREADY_EXIST: [409, "Seats already generated for this screen"],
+  SEAT_LAYOUT_TOO_SMALL: [400, "The selected rows and seats per row do not fit the screen capacity"],
   SEAT_ALREADY_TAKEN: [409, "One or more selected seats are already held or booked"],
   NOT_PENDING: [409, "This booking is not in a confirmable state"],
   NOT_CANCELLABLE: [409, "This booking cannot be cancelled"],
